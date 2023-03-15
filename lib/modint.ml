@@ -1,3 +1,11 @@
+let extgcd a b =
+  let rec loop a b s t s' t'  =
+    if b = 0 then
+      (s, t, a)
+    else
+      loop b (a mod b) s' t' (s - (a / b) * s') (t - (a / b) * t') in
+  loop a b 1 0 0 1
+
 module ModInt998244353: sig
   type t
   val of_int : int -> t
@@ -7,9 +15,11 @@ module ModInt998244353: sig
   val add : t -> t -> t
   val sub : t -> t -> t
   val mul : t -> t -> t
+  val div : t -> t -> t
   val (+%) : t -> t -> t
   val (-%) : t -> t -> t
   val ( *% ) : t -> t -> t
+  val (/%) : t -> t -> t
 end = struct
   type t = int
   let mo = 998_244_353
@@ -26,9 +36,19 @@ end = struct
     let k = i - j in
     if k >= 0 then k else k + mo
   let mul i j = i * j mod mo
+  let div i j =
+    assert (j <> 0);
+    let (inv_j, _, _) = extgcd j mo in
+    let inv_j =
+      if inv_j >= 0 then
+        inv_j
+      else
+        inv_j + mo in
+    mul i inv_j
   let (+%) i j = add i j
   let (-%) i j = sub i j
   let ( *% ) i j = mul i j
+  let ( /% ) i j = div i j
 end
 
 module ModInt (M : sig val mo : int end) : sig
