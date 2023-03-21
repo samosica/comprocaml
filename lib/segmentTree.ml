@@ -98,3 +98,19 @@ module PrefixSumMonoid = struct
 end
 
 (* module SegTree = SegmentTree.Make (PrefixSumMonoid) *)
+
+module IntPairMinMonoid = struct
+  type t = int * int
+  let one = (max_int, max_int)
+  let mul p q = min p q
+end
+
+(* module MinSegmentTree = SegmentTree.Make (IntPairMinMonoid) *)
+
+module IntAddMonoid = struct
+  type t = int
+  let one = 0
+  let mul x y = x + y
+end
+
+(* module SumSegmentTree = SegmentTree.Make (IntAddMonoid) *)
