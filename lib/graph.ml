@@ -14,3 +14,26 @@ let decomp n al =
       end
     done in
   !cs
+
+(* それぞれの頂点の深さを計算する *)
+(* i 番目の頂点の深さは depth.(i) に格納される *)
+(* 使用方法: compute_depth (-1) (起点) 0 (隣接リスト) depth *)
+let rec compute_depth p v d al depth =
+  depth.(v) <- d;
+  List.iter (fun w ->
+    if w <> p then compute_depth v w (d + 1) al depth
+  ) al.(v)
+
+(* Euler tour を計算する *)
+(* in_.(i) には i 番目の頂点に入ったタイミングが記録される *)
+(* out.(i) には i 番目の頂点から出て行ったタイミングが記録される *)
+(* in_, out を使うと LCA を計算したり、木上で1点更新、パスクエリが実装できる *)
+(* 使用方法: tour (-1) (起点) (ref 0) (隣接リスト) in_ out *)
+let rec tour p v c al in_ out =
+  in_.(v) <- !c;
+  incr c;
+  List.iter (fun w ->
+    if w <> p then tour v w c al in_ out
+  ) al.(v);
+  out.(v) <- !c;
+  incr c
