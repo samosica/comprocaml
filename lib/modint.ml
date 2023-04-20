@@ -16,10 +16,12 @@ module ModInt998244353: sig
   val sub : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t
+  val inv : t -> t
   val (+%) : t -> t -> t
   val (-%) : t -> t -> t
   val ( *% ) : t -> t -> t
   val (/%) : t -> t -> t
+  val (~/%) : t -> t
   val (^%) : t -> int -> t
 end = struct
   type t = int
@@ -37,19 +39,18 @@ end = struct
     let k = i - j in
     if k >= 0 then k else k + mo
   let mul i j = i * j mod mo
+  let inv i =
+    assert (i <> 0);
+    let (inv_i, _, _) = extgcd i mo in
+    if inv_i >= 0 then inv_i else inv_i + mo
   let div i j =
     assert (j <> 0);
-    let (inv_j, _, _) = extgcd j mo in
-    let inv_j =
-      if inv_j >= 0 then
-        inv_j
-      else
-        inv_j + mo in
-    mul i inv_j
+    mul i (inv j)
   let (+%) i j = add i j
   let (-%) i j = sub i j
   let ( *% ) i j = mul i j
   let ( /% ) i j = div i j
+  let (~/%) i = inv i
   let rec pow_aux a n p =
     if n = 0 then
       p
