@@ -20,6 +20,7 @@ module ModInt998244353: sig
   val (-%) : t -> t -> t
   val ( *% ) : t -> t -> t
   val (/%) : t -> t -> t
+  val (^%) : t -> int -> t
 end = struct
   type t = int
   let mo = 998_244_353
@@ -49,6 +50,14 @@ end = struct
   let (-%) i j = sub i j
   let ( *% ) i j = mul i j
   let ( /% ) i j = div i j
+  let rec pow_aux a n p =
+    if n = 0 then
+      p
+    else if n mod 2 = 1 then
+      pow_aux (a *% a) (n / 2) (p *% a)
+    else
+      pow_aux (a *% a) (n / 2) p
+  let[@inline] (^%) a n = pow_aux a n 1
 end
 
 module ModInt (M : sig val mo : int end) : sig
