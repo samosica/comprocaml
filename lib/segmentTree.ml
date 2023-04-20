@@ -10,7 +10,9 @@ module SegmentTree : sig
     type t
 
     val make : int -> t
+    val at : int -> t -> elt
     val set : int -> elt -> t -> unit
+    val update : f:(elt -> elt) -> int -> t -> unit
     val product : int -> int -> t -> elt
     val binary_search : (elt -> bool) -> t -> int
   end
@@ -22,7 +24,9 @@ end = struct
     type t
 
     val make : int -> t
+    val at : int -> t -> elt
     val set : int -> elt -> t -> unit
+    val update : f:(elt -> elt) -> int -> t -> unit
     val product : int -> int -> t -> elt
     val binary_search : (elt -> bool) -> t -> int
   end
@@ -43,6 +47,10 @@ end = struct
         prod = Array.make (leaf_count * 2) M.one;
       }
 
+    let at k t =
+      let k = k + t.leaf_count in
+      t.prod.(k)
+
     let rec recalc k t =
       if k > 1 then begin
         let p = k / 2 in
@@ -53,6 +61,11 @@ end = struct
     let set k v t =
       let k = k + t.leaf_count in
       t.prod.(k) <- v;
+      recalc k t
+
+    let update ~f k t =
+      let k = k + t.leaf_count in
+      t.prod.(k) <- f t.prod.(k);
       recalc k t
 
     let product l r t =
