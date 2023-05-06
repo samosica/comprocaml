@@ -10,20 +10,6 @@ let divisor_pair_count n =
     | _, _ -> () in
   loop 1; !c
 
-(** The refined version of Iter.int_range_by.
-    [refined_int_range_by ~step l r] returns an iterator iterating over the
-    intersection of the set of integers between l and r (inclusive) and the set
-    of integers represented in the form l + step * i (where i is a nonnegative
-    integer).
-    [refined_int_range_by] does not always return the same iterator as
-    [Iter.int_range_by]. For instance, step = 2, l = 11, and r = 10.
-  *)
-  let refined_int_range_by ~step l r =
-    if r - l < 0 && step > 0 || r - l > 0 && step < 0 then
-      Iter.empty
-    else
-      Iter.int_range_by ~step l r
-
 (** Sieve of Eratosthenes.
     [sieve n] returns two arrays [is_prime] and [largest_prime_factor] with size [n + 1].
     The i-th element of [is_prime] is whether i is a prime.
@@ -45,15 +31,21 @@ let sieve n =
   let () =
     if n >= 2 then begin
       largest_prime_factor.(2) <- 2;
-      refined_int_range_by ~step:2 4 n |> Iter.iter @@ fun i ->
+      Iter.iterate ((+) 2) 4
+      |> Iter.take_while ((>=) n)
+      |> Iter.iter @@ fun i ->
         is_prime.(i) <- false;
         largest_prime_factor.(i) <- 2
     end in
   let () =
-    refined_int_range_by ~step:2 3 n |> Iter.iter @@ fun i ->
+    Iter.iterate ((+) 2) 3
+    |> Iter.take_while ((>=) n)
+    |> Iter.iter @@ fun i ->
       if is_prime.(i) then begin
         largest_prime_factor.(i) <- i;
-        refined_int_range_by ~step:i (2 * i) n |> Iter.iter @@ fun j ->
+        Iter.iterate ((+) i) (2 * i)
+        |> Iter.take_while ((>=) n)
+        |> Iter.iter @@ fun j ->
           is_prime.(j) <- false;
           largest_prime_factor.(j) <- i
       end in
