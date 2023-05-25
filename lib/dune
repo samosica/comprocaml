@@ -1,0 +1,4 @@
+(library
+ (name comprocaml)
+ (public_name comprocaml)
+ (libraries base iter))
