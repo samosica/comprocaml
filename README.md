@@ -7,6 +7,5 @@ This library is licensed under the MIT License (see LICENSE), but if you submit 
 - As of March 14, 2023, `@tail_mod_cons` attribute, which enables [tail modulo constructor transformation](https://v2.ocaml.org/manual/tail_mod_cons.html), is ignored in AtCoder. It will be available after the next language update.
 
 ## TODO
-- Use Dune
 - Documentation (accessible from the Web)
 - Add tests
