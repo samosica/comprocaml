@@ -1,0 +1,10 @@
+*
+!lib
+!lib/*
+!test
+!test/*
+!.gitignore
+!comprocaml.opam
+!dune-project
+!LICENSE
+!README.md
