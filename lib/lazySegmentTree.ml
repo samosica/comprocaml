@@ -40,7 +40,7 @@ module LazySegmentTree : sig
   module Make
     (M : MonoidType)
     (N : MonoidType)
-    (Action : ActionType with type t = M.t and type a = N.t)
+    (_ : ActionType with type t = M.t and type a = N.t)
   : S with type elt = M.t and type act = N.t
 end = struct
   module type S = sig

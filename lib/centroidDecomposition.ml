@@ -33,7 +33,7 @@ let centroid_decomp t =
     | t' :: _ ->
       let ts' = tt @ smaller in
       (* t' とそれ以外に分ける *)
-      decomp t' [T(root_index t, n - root_value t', ts')] n in
+      decomp t' [T(root_index t, n - root_value t', ts')] n
     | [] ->
-      T(root_index t, (), List.map (fun t -> decomp t [] (root_value t)) (tt @ subtrees t))
+      T(root_index t, (), List.map (fun t -> decomp t [] (root_value t)) (tt @ subtrees t)) in
   decomp t [] (root_value t)

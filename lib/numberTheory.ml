@@ -59,7 +59,7 @@ let divisors ~prime_factor n =
       ds
     else
       let p = prime_factor.(n) in
-      let c = divisible_count n p in
+      let c = Math.divisible_count n p in
       let pl = Array.length ds in
       let ds' = Array.make (pl * (c + 1)) 0 in
       let pow_p = ref 1 in
