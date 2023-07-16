@@ -37,3 +37,20 @@ let rec tour p v c al in_ out =
   ) al.(v);
   out.(v) <- !c;
   incr c
+
+let rec bfs_aux queue al dist k =
+  if Queue.is_empty queue then
+    ()
+  else begin
+    let v = Queue.pop queue in
+    k v;
+    Iter.of_list al.(v)
+    |> Iter.filter (fun w -> dist.(w) = -1)
+    |> Iter.iter (fun w ->
+      dist.(w) <- dist.(v) + 1;
+      Queue.add w queue
+    );
+    bfs_aux queue al dist k
+  end
+
+let bfs queue al dist = Iter.from_iter @@ bfs_aux queue al dist
