@@ -14,6 +14,7 @@ module BitSet : sig
   val inter : t -> t -> t
   val union : t -> t -> t
   val diff : t -> t -> t
+  val symdiff : t -> t -> t
   val (&:) : t -> t -> t
   val (|:) : t -> t -> t
   val (-:) : t -> t -> t
@@ -45,6 +46,9 @@ end = struct
   let[@inline] inter s s' = s land s'
   let[@inline] union s s' = s lor s'
   let[@inline] diff s s' = s land (lnot s')
+
+  (** Symmetric difference *)
+  let[@inline] symdiff s s' = s lxor s'
   let[@inline] (&:) s s' = inter s s'
   let[@inline] (|:) s s' = union s s'
   let[@inline] (-:) s s' = diff s s'
@@ -92,5 +96,4 @@ end = struct
     k s';
     if s' <> -1 then supersets_aux s ((s' + 1) lor s) k
   let supersets s = Iter.from_iter (supersets_aux s s)
-  let[@inline] all_sets () = Iter.(append (0 -- max_int) (min_int --^ (-1)))
 end
