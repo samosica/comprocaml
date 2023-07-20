@@ -1,5 +1,4 @@
 (* TODO: Implement
- * - max_elt
  * - comparison operators (compare sets as integers)
  * - generalize subsets and supersets
  *)
@@ -22,6 +21,7 @@ module BitSet : sig
   val mem : int -> t -> bool
   val cardinal : t -> int
   val min_elt : t -> int
+  val max_elt : t -> int
   val of_int : int -> t
   val to_int : t -> int
   val to_iter : t -> int Iter.t
@@ -69,6 +69,9 @@ end = struct
   let[@inline] min_elt s =
     assert (s <> 0);
     Base.Int.ctz s
+  let[@inline] max_elt s =
+    assert (s <> 0);
+    Sys.int_size - 1 - Base.Int.clz s
   let of_int s = s
   let to_int s = s
   let[@inline] rec to_iter_aux s k =
