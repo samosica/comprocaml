@@ -14,9 +14,9 @@ module BitSet : sig
   val inter : t -> t -> t
   val union : t -> t -> t
   val diff : t -> t -> t
-  val (&&) : t -> t -> t
-  val (||) : t -> t -> t
-  val (--) : t -> t -> t
+  val (&:) : t -> t -> t
+  val (|:) : t -> t -> t
+  val (-:) : t -> t -> t
   val add : int -> t -> t
   val remove : int -> t -> t
   val iota : int -> int -> t
@@ -32,15 +32,34 @@ end = struct
   type t = int
   let empty = 0
   let[@inline] is_empty s = s = empty
-  let[@inline] singleton i = 1 lsl i
+  let[@inline] singleton i =
+    assert (0 <= i && i < Sys.int_size);
+    1 lsl i
   let[@inline] inter s s' = s land s'
   let[@inline] union s s' = s lor s'
   let[@inline] diff s s' = s land (lnot s')
   let[@inline] (&:) s s' = inter s s'
   let[@inline] (|:) s s' = union s s'
   let[@inline] (-:) s s' = diff s s'
+  let[@inline] add i s =
+    assert (0 <= i && i < Sys.int_size);
+    s lor (1 lsl i)
+  let[@inline] remove i s =
+    assert (0 <= i && i < Sys.int_size);
+    s -: singleton i
+  let[@inline] iota l r =
+    assert (0 <= l && l < Sys.int_size);
+    assert (0 <= r && r <= Sys.int_size);
+    if l < r then
+      (1 lsl (r - l) - 1) lsl l
+    else
+      0
+  let[@inline] mem i s =
+    0 <= i && i < Sys.int_size && s lsr i > 0
   let[@inline] cardinal s = Base.Int.popcount s
-  let[@inline] min_elt s = Base.Int.ctz s
+  let[@inline] min_elt s =
+    assert (s <> 0);
+    Base.Int.ctz s
   let of_int s = s
   let to_int s = s
   let[@inline] rec to_iter_aux s k =
