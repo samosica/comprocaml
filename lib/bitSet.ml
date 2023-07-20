@@ -1,5 +1,4 @@
 (* TODO: Implement
- * - comparison operators (compare sets as integers)
  * - generalize subsets and supersets
  *)
 
@@ -20,6 +19,12 @@ module BitSet : sig
   val iota : int -> int -> t
   val mem : int -> t -> bool
   val cardinal : t -> int
+
+  (** Equality check of bitsets. *)
+  val equal : t -> t -> bool
+
+  (** Compare bitsets in their integer representations. *)
+  val compare : t -> t -> int
   val min_elt : t -> int
   val max_elt : t -> int
   val of_int : int -> t
@@ -66,6 +71,8 @@ end = struct
   let[@inline] mem i s =
     0 <= i && i < Sys.int_size && s lsr i > 0
   let[@inline] cardinal s = Base.Int.popcount s
+  let[@inline] equal s s' = s = s'
+  let[@inline] compare s s' = Int.compare s s'
   let[@inline] min_elt s =
     assert (s <> 0);
     Base.Int.ctz s
