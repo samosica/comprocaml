@@ -1,10 +1,7 @@
 (* TODO: Implement
- * - subsets (using decreasing order)
- * - subsets_inc (using increasing order)
  * - max_elt
  * - comparison operators (compare sets as integers)
  *)
-(* TODO: Add assertions *)
 
 module BitSet : sig
   type t
