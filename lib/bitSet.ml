@@ -1,6 +1,7 @@
 (* TODO: Implement
  * - max_elt
  * - comparison operators (compare sets as integers)
+ * - generalize subsets and supersets
  *)
 
 module BitSet : sig
