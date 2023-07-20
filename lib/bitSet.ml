@@ -27,6 +27,13 @@ module BitSet : sig
   val to_int : t -> int
   val to_iter : t -> int Iter.t
   val all_sets : unit -> t Iter.t
+
+  (** Enumerate the subsets of a given set in increasing order. *)
+  val subsets : t -> t Iter.t
+
+  (** Enumerate the subsets of a given set in decreasing order. *)
+  val subsets_dec : t -> t Iter.t
+
   val supersets : t -> t Iter.t
 end = struct
   type t = int
@@ -69,6 +76,18 @@ end = struct
       to_iter_aux (remove i s) k
     end
   let to_iter s = Iter.from_iter (to_iter_aux s)
+  let[@inline] all_sets () = Iter.(append (0 -- max_int) (min_int --^ (-1)))
+  let[@inline] rec subsets_aux s s' k =
+    k s';
+    if s' <> s then begin
+      let i = min_elt (s' lxor s) in
+      subsets_aux s ((s' lsr i + 1) lsl i) k
+    end
+  let subsets s = Iter.from_iter (subsets_aux s 0)
+  let[@inline] rec subsets_dec_aux s s' k =
+    k s';
+    if s' <> 0 then subsets_dec_aux s ((s' - 1) land s) k
+  let subsets_dec s = Iter.from_iter (subsets_dec_aux s s)
   let[@inline] rec supersets_aux s s' k =
     k s';
     if s' <> -1 then supersets_aux s ((s' + 1) lor s) k
