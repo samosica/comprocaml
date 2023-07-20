@@ -1,7 +1,3 @@
-(* TODO: Implement
- * - generalize subsets and supersets
- *)
-
 module BitSet : sig
   type t
   val empty : t
@@ -32,8 +28,11 @@ module BitSet : sig
   val to_iter : t -> int Iter.t
   val all_sets : unit -> t Iter.t
 
-  (** Enumerate the subsets of a given set in increasing order. *)
-  val subsets : t -> t Iter.t
+  (**
+      Enumerate the subsets of a given set from [start] in increasing order.
+      The default value of [start] is the empty set.
+    *)
+  val subsets : ?start:t -> t -> t Iter.t
 
   (** Enumerate the subsets of a given set in decreasing order. *)
   val subsets_dec : t -> t Iter.t
@@ -95,7 +94,9 @@ end = struct
       let i = min_elt (s' lxor s) in
       subsets_aux s ((s' lsr i + 1) lsl i) k
     end
-  let subsets s = Iter.from_iter (subsets_aux s 0)
+  let subsets ?(start = 0) s =
+    assert (start land s = start);
+    Iter.from_iter (subsets_aux s start)
   let[@inline] rec subsets_dec_aux s s' k =
     k s';
     if s' <> 0 then subsets_dec_aux s ((s' - 1) land s) k
