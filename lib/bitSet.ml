@@ -68,7 +68,7 @@ end = struct
     else
       0
   let[@inline] mem i s =
-    0 <= i && i < Sys.int_size && s lsr i > 0
+    0 <= i && i < Sys.int_size && s lsr i land 1 > 0
   let[@inline] cardinal s = Base.Int.popcount s
   let[@inline] equal s s' = s = s'
   let[@inline] compare s s' = Int.compare s s'
