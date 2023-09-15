@@ -54,3 +54,34 @@ let rec bfs_aux queue al dist k =
   end
 
 let bfs queue al dist = Iter.from_iter @@ bfs_aux queue al dist
+
+let rec compl_bfs_aux queue unused al dist k =
+  if not @@ Queue.is_empty queue then begin
+    let v = Queue.pop queue in
+    let next_unused = ref [] in
+    let rec loop unused al =
+      match unused, al with
+      | [], _ -> ()
+      | x :: _, y :: al' when x > y -> (* x <= y となるまでスキップ *)
+        loop unused al'
+      | x :: unused', y :: al' when x = y ->
+        (* x ∈ al.(v) なので、x はまだ使えない *)
+        next_unused := x :: !next_unused;
+        loop unused' al'
+      | x :: unused', _ ->
+        (* x ∉ al.(v) なので、v から x に移動できる *)
+        Queue.add x queue;
+        dist.(x) <- dist.(v) + 1;
+        k x;
+        loop unused' al in
+    loop unused al.(v);
+    compl_bfs_aux queue (List.rev !next_unused) al dist k
+  end
+
+(** 補グラフ上の幅優先探索。
+  [unused]、[al.(v)]はソートされている必要がある
+  *)
+let compl_bfs queue unused al dist =
+  assert (Base.List.is_sorted ~compare:Int.compare unused);
+  assert (Array.for_all (Base.List.is_sorted ~compare:Int.compare) al);
+  Iter.from_iter @@ compl_bfs_aux queue unused al dist
