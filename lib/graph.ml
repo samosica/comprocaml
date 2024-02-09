@@ -39,9 +39,7 @@ let rec tour p v c al in_ out =
   incr c
 
 let rec bfs_aux queue al dist k =
-  if Queue.is_empty queue then
-    ()
-  else begin
+  if not (Queue.is_empty queue) then begin
     let v = Queue.pop queue in
     k v;
     Iter.of_list al.(v)
