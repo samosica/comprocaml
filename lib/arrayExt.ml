@@ -1,4 +1,4 @@
-(** Compute the next permutation of [t] in lexicographic order.
+(** Compute the next permutation of [t] in the lexicographic order.
     Just return [false] if [t] is the last permutation;
     otherwise modify [t] and return [true].
   *)
