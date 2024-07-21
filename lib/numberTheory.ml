@@ -72,3 +72,10 @@ let divisors ~prime_factor n =
         done in
       loop (n / !pow_p) ds' in
   loop n ds
+
+let fact n =
+  let[@inline] rec fact_aux n p =
+    if n <= 1 then p
+    else fact_aux (n - 1) (p * n) in
+  assert (n >= 0);
+  fact_aux n 1
