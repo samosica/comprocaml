@@ -1,6 +1,6 @@
-(** Compute the next permutation of [t] in the lexicographic order.
-    Just return [false] if [t] is the last permutation;
-    otherwise modify [t] and return [true].
+(** Compute the next permutation of an array [a] in the lexicographic order.
+    Just return [false] if [a] is the last permutation;
+    otherwise modify [a] and return [true].
   *)
 let next_permutation ?(cmp = compare) a =
   let[@inline] rec f i =
