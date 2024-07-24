@@ -1,22 +1,11 @@
 (** Formal Power Series *)
 
-(** Extended Euclidean algorithm.
-    Given a pair (a, b) of integers, returns a triple (s, t, g) of integers
-    such that g is the GCD of a and b, and sa + tb = g.
+(*
+  N.B. at this moment, FPS module has three submodules,
+  although they should be in different files. If we divide
+  them, some programs using this module become a bit slower.
 *)
-let extgcd a b =
-  let rec loop a b s t s' t'  =
-    if b = 0 then
-      (s, t, a)
-    else
-      loop b (a mod b) s' t' (s - (a / b) * s') (t - (a / b) * t') in
-  loop a b 1 0 0 1
 
-let ceil_log2 n =
-  let rec loop log pow = if n <= pow then log else loop (log + 1) (pow * 2) in
-  loop 0 1
-
-(** 998244353 - 1 = 2^23 * 7 * 17 *)
 module Mod998244353 = struct
   (** = 998,244,353 *)
   let modulus = 998_244_353
@@ -29,7 +18,7 @@ module Mod998244353 = struct
   let[@inline] (~-%) i = if i > 0 then modulus - i else 0
   let[@inline] (~/%) i =
     assert (i <> 0);
-    let (inv_i, _, _) = extgcd i modulus in
+    let (inv_i, _, _) = Math.extgcd i modulus in
     if inv_i >= 0 then inv_i else inv_i + modulus
   let[@inline] (+%) i j = let k = i + j in if k < modulus then k else k - modulus
   let[@inline] (-%) i j = let k = i - j in if k >= 0 then k else k + modulus
@@ -52,6 +41,8 @@ module Mod998244353 = struct
 end
 
 module Convolution : sig
+  (* 998244353 - 1 = 2^23 * 7 * 17 *)
+
   (** Discrete Fourier transform over F_998244353[x].
       Constraint: 0 <= l <= 23 and (the size of a) <= 2^l if you write [fourier998244353 l a].
       This function uses the Cooley-Tukey algorithm.
@@ -152,7 +143,7 @@ end = struct
       [| |]
     else
       let n = Array.length a + Array.length b - 1 in
-      let l = ceil_log2 n in
+      let l = Math.ceil_log2 n in
       let () = assert (l <= 23) in
       let a' = fourier998244353 l a in
       let b' = fourier998244353 l b in

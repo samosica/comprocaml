@@ -1,4 +1,5 @@
 module type S = sig
+  (* TODO: add modulus *)
   type t
 
   val of_int : int -> t
@@ -21,4 +22,5 @@ module type S = sig
   val (^%) : t -> int -> t
 end
 
+(* TODO: mo -> modulus ? *)
 module Make (_ : sig val mo : int end) : S

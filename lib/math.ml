@@ -13,3 +13,7 @@ let extgcd a b =
     else
       loop b (a mod b) s' t' (s - (a / b) * s') (t - (a / b) * t') in
   loop a b 1 0 0 1
+
+let ceil_log2 n =
+  let rec loop log pow = if n <= pow then log else loop (log + 1) (pow * 2) in
+  loop 0 1

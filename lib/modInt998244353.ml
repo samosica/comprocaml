@@ -30,6 +30,7 @@ let (+%) i j = add i j
 let (-%) i j = sub i j
 let ( *% ) i j = mul i j
 let ( /% ) i j = div i j
+let (~-%) i = if i > 0 then mo - i else 0
 let (~/%) i = inv i
 let rec pow_aux a n p =
   if n = 0 then
