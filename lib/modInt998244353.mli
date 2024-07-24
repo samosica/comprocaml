@@ -1,4 +1,4 @@
-type t = int
+type t = private int
 
 (** = 998_244_353 *)
 val mo : int
