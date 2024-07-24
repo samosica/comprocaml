@@ -1,7 +1,5 @@
-(** Compute the next permutation of [t] in the lexicographic order.
-    Just return [false] if [t] is the last permutation;
-    otherwise modify [t] and return [true].
-  *)
+let[@inline] replace a i f = a.(i) <- f a.(i)
+
 let next_permutation ?(cmp = compare) a =
   let[@inline] rec f i =
     if i = 0 then i

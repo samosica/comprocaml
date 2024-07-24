@@ -1,25 +1,27 @@
-(* 番号づけられた頂点を持つ木 *)
-(* T(i, v, ts) は根の番号が i、格納している値が v で、その下にある部分木のリストが ts である木を表す *)
+(** 番号づけられた頂点を持つ木
+    T(i, v, ts) は根の番号が i、格納している値が v で、その下にある部分木のリストが ts である木を表す
+  *)
 type 'a indexed_tree = T of int * 'a * 'a indexed_tree list
 
 let root_index (T(i, _, _)) = i
 let root_value (T(_, v, _)) = v
 let subtrees (T(_, _, ts)) = ts
 
-(* 隣接リストから indexed_tree を構築する関数 *)
-(* al はグラフの隣接リストで、al.(i) は i 番目の頂点と隣接する頂点の番号のリスト *)
+(** 隣接リストから indexed_tree を構築する関数
+    al はグラフの隣接リストで、al.(i) は i 番目の頂点と隣接する頂点の番号のリスト
+  *)
 let dfs_tree al =
   let rec dfs p i =
     T(i, (), List.filter_map (fun j -> if j = p then None else Some (dfs i j)) al.(i)) in
   dfs (-1) 0
 
-(* 各頂点にそれを根とする部分木のサイズを格納した木を返す関数 *)
+(** 各頂点にそれを根とする部分木のサイズを格納した木を返す関数 *)
 let rec size_tree t =
   let ts = List.map size_tree (subtrees t) in
   let count = List.fold_left (fun c t -> c + root_value t) 1 ts in
   T(root_index t, count, ts)
 
-(* 重心分解を行う関数 *)
+(** 重心分解を行う関数 *)
 let centroid_decomp t =
   (*  t: いま注目している木 *)
   (* tt: t の上側にあった木のリスト *)

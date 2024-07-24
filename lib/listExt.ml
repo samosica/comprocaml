@@ -6,6 +6,7 @@ let rec rep n l =
   else
     List.concat_map (fun x -> List.map (List.cons x) (rep (n - 1) l)) l
 
+(* TODO: make b labeled *)
 let[@tail_mod_cons] rec digits n b =
   if n = 0 then
     []
