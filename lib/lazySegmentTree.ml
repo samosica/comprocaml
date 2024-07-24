@@ -1,29 +1,3 @@
-module type MonoidType = sig
-  type t
-  val one : t
-  val mul : t -> t -> t
-end
-
-(* a right action of a on t *)
-module type ActionType = sig
-  type t
-  type a
-  val act : t -> a -> t
-end
-
-module Bit = struct
-  let leftmost_bit n =
-    let () = assert (n > 0) in
-    let rec loop n w r =
-      if w = 0 then
-        r
-      else if n lsr w > 0 then
-        loop (n lsr w) (w / 2) (r + w)
-      else
-        loop n (w / 2) r in
-    loop n 32 0
-end
-
 module LazySegmentTree : sig
   module type S = sig
     type elt
@@ -38,10 +12,9 @@ module LazySegmentTree : sig
   end
 
   module Make
-    (M : MonoidType)
-    (N : MonoidType)
-    (_ : ActionType with type t = M.t and type a = N.t)
-  : S with type elt = M.t and type act = N.t
+    (M : Monoid.S)
+    (A : Monoid.Action with type t = M.t)
+  : S with type elt = M.t and type act = A.M.t
 end = struct
   module type S = sig
     type elt
@@ -56,12 +29,11 @@ end = struct
   end
 
   module Make
-    (M : MonoidType)
-    (N : MonoidType)
-    (Action : ActionType with type t = M.t and type a = N.t) =
+    (M : Monoid.S)
+    (A : Monoid.Action with type t = M.t) =
   struct
     type elt = M.t
-    type act = N.t
+    type act = A.M.t
     type t = {
       leaf_count : int;
       prod : elt array;
@@ -75,16 +47,16 @@ end = struct
       {
         leaf_count = leaf_count;
         prod = Array.make (leaf_count * 2) M.one;
-        prop = Array.make (leaf_count * 2) N.one;
+        prop = Array.make (leaf_count * 2) A.M.one;
       }
 
     let propagate k t =
-      t.prod.(k) <- Action.act t.prod.(k) t.prop.(k);
+      t.prod.(k) <- A.act t.prod.(k) t.prop.(k);
       if k < t.leaf_count then begin
-        t.prop.(k * 2 + 0) <- N.mul t.prop.(k * 2 + 0) t.prop.(k);
-        t.prop.(k * 2 + 1) <- N.mul t.prop.(k * 2 + 1) t.prop.(k)
+        t.prop.(k * 2 + 0) <- A.M.mul t.prop.(k * 2 + 0) t.prop.(k);
+        t.prop.(k * 2 + 1) <- A.M.mul t.prop.(k * 2 + 1) t.prop.(k)
       end;
-      t.prop.(k) <- N.one
+      t.prop.(k) <- A.M.one
     
     let propagate_topdown k t =
       for i = Bit.leftmost_bit k downto 1 do
@@ -94,8 +66,8 @@ end = struct
     let rec recalc k t =
       if k > 1 then begin
         let p = k / 2 in
-        let vl = Action.act t.prod.(p * 2 + 0) t.prop.(p * 2 + 0) in
-        let vr = Action.act t.prod.(p * 2 + 1) t.prop.(p * 2 + 1) in
+        let vl = A.act t.prod.(p * 2 + 0) t.prop.(p * 2 + 0) in
+        let vr = A.act t.prod.(p * 2 + 1) t.prop.(p * 2 + 1) in
         t.prod.(p) <- M.mul vl vr;
         recalc p t
       end
@@ -104,7 +76,7 @@ end = struct
       let k = k + t.leaf_count in
       propagate_topdown k t;
       t.prod.(k) <- v;
-      t.prop.(k) <- N.one;
+      t.prop.(k) <- A.M.one;
       recalc k t
 
     let apply_range l r f t =
@@ -118,8 +90,8 @@ end = struct
         if kr > 0 then propagate_topdown kr t in
       let rec loop l r =
         if l < r then begin
-          if l mod 2 > 0 then t.prop.(l) <- N.mul t.prop.(l) f;
-          if r mod 2 > 0 then t.prop.(r - 1) <- N.mul t.prop.(r - 1) f;
+          if l mod 2 > 0 then t.prop.(l) <- A.M.mul t.prop.(l) f;
+          if r mod 2 > 0 then t.prop.(r - 1) <- A.M.mul t.prop.(r - 1) f;
           let l' = if l mod 2 > 0 then l + 1 else l in
           let r' = if r mod 2 > 0 then r - 1 else r in
           loop (l' / 2) (r' / 2)
@@ -140,12 +112,12 @@ end = struct
         if l < r then begin
           let (l', pl') =
             if l mod 2 > 0 then
-              (l + 1, M.mul pl (Action.act t.prod.(l) t.prop.(l)))
+              (l + 1, M.mul pl (A.act t.prod.(l) t.prop.(l)))
             else
               (l, pl) in
           let (r', pr') =
             if r mod 2 > 0 then
-              (r - 1, M.mul (Action.act t.prod.(r - 1) t.prop.(r - 1)) pr)
+              (r - 1, M.mul (A.act t.prod.(r - 1) t.prop.(r - 1)) pr)
             else
               (r, pr) in
           loop (l' / 2) (r' / 2) pl' pr'
@@ -159,7 +131,7 @@ end = struct
           i
         else begin
           propagate k t;
-          let v' = Action.act t.prod.(k * 2 + 0) t.prop.(k * 2 + 0) in
+          let v' = A.act t.prod.(k * 2 + 0) t.prop.(k * 2 + 0) in
           if p (M.mul v v') then
             loop (k * 2 + 0) i v (w / 2)
           else
@@ -169,22 +141,4 @@ end = struct
   end
 end
 
-module IntAddMonoid = struct
-  type t = int
-  let one = 0
-  let mul x y = x + y
-end
-
-module IntMaxMonoid = struct
-  type t = int
-  let one = min_int
-  let mul x y = max x y
-end
-
-module IntAddAction = struct
-  type t = int
-  type a = int
-  let act x a = x + a
-end
-
-(* module LazySegTree = LazySegmentTree.Make (IntMaxMonoid) (IntAddMonoid) (IntAddAction) *)
+(* module LazySegTree = LazySegmentTree.Make (IntMaxMonoid) (IntAddAction) *)
