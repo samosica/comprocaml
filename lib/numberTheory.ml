@@ -10,12 +10,6 @@ let divisor_pair_count n =
     | _, _ -> () in
   loop 1; !c
 
-(** Sieve of Eratosthenes.
-    [sieve n] returns two arrays [is_prime] and [largest_prime_factor] with size [n + 1].
-    The i-th element of [is_prime] is whether i is a prime.
-    The i-th element of [largest_prime_factor] is the largest prime factor of i if i >= 2;
-    otherwise -1.
-  *)
 let sieve n =
   assert (n >= 0);
   let is_prime = Array.make (n + 1) true in

@@ -1,3 +1,6 @@
+(* TODO: make parameters such as al labeled *)
+(* TODO: add DFS *)
+
 (* 連結成分ごとに分解する *)
 let decomp n al =
   let cs = ref [] in

@@ -1,10 +1,5 @@
-(** Apply a function to an element of an array *)
 let[@inline] replace a i f = a.(i) <- f a.(i)
 
-(** Compute the next permutation of an array [a] in the lexicographic order.
-    Just return [false] if [a] is the last permutation;
-    otherwise modify [a] and return [true].
-  *)
 let next_permutation ?(cmp = compare) a =
   let[@inline] rec f i =
     if i = 0 then i
