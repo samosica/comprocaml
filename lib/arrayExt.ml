@@ -76,3 +76,24 @@ let next_combination_rep ?(cmp = compare) ~from a =
     done;
     true
   end
+
+let next_tuple ?(cmp = compare) ~from a =
+  let len_from = Array.length from in
+  let len_a = Array.length a in
+  let[@inline] rec f i =
+    if i < 0 then i
+    else if cmp a.(i) from.(len_from - 1) <> 0 then i
+    else f (i - 1) in
+  let[@inline] rec g b j =
+    if cmp b from.(j) < 0 then j
+    else g b (j + 1) in
+  let i = f (len_a - 1) in
+  if i < 0 then false
+  else begin
+    let j = g a.(i) 1 in
+    a.(i) <- from.(j);
+    for k = i + 1 to len_a - 1 do
+      a.(k) <- from.(0)
+    done;
+    true
+  end

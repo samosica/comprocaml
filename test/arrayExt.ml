@@ -151,3 +151,26 @@ let%test "next_combination_rep(7, 4)" =
     if ArrayExt.next_combination_rep ~from a then loop () in
   loop();
   !count = 210
+
+let%test "next_tuple(3, 4)" =
+  let n = 3 in
+  let k = 4 in
+  let from = Array.init n Fun.id in
+  let a = Array.make k 0 in
+  let count = ref 0 in
+  let rec loop () =
+    incr count;
+    if ArrayExt.next_tuple ~from a then loop () in
+  loop();
+  !count = 3 * 3 * 3 * 3
+
+let%test "next_tuple(10, 0)" =
+  let n = 10 in
+  let from = Array.init n Fun.id in
+  let a = [| |] in
+  let count = ref 0 in
+  let rec loop () =
+    incr count;
+    if ArrayExt.next_tuple ~from a then loop () in
+  loop();
+  !count = 1

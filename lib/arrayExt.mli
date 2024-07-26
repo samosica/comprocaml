@@ -48,3 +48,15 @@ val next_combination : ?cmp:('a -> 'a -> int) -> from:'a array -> 'a array -> bo
     The time complexity is O(|a| + |from|).
   *)
 val next_combination_rep : ?cmp:('a -> 'a -> int) -> from:'a array -> 'a array -> bool
+
+(** Compute the next tuple of [from].
+    Just return [false] if a given array [a] is the last tuple;
+    otherwise modify [a] and return [true].
+    The order of tuples is lexicographic one.
+
+    [from] must be sorted in ascending order, and
+    must not have duplicates.
+
+    The time complexity is O(|a| + |from|).
+  *)
+val next_tuple : ?cmp:('a -> 'a -> int) -> from:'a array -> 'a array -> bool
