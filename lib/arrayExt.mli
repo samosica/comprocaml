@@ -1,14 +1,6 @@
 (** Apply a function to an element of an array *)
 val replace : 'a array -> int -> ('a -> 'a) -> unit
 
-(** Compute the next permutation of an array [a] in the lexicographic order.
-    Just return [false] if [a] is the last permutation;
-    otherwise modify [a] and return [true].
-
-    This function allows duplicate elements.
-  *)
-val next_permutation : ?cmp:('a -> 'a -> int) -> 'a array -> bool
-
 (** Compute the next *subpermutation* of an array [a] in the lexicographic order.
     Just return [false] if [a] is the last subpermutation;
     otherwise modify [a] and return [true].
@@ -22,6 +14,16 @@ val next_permutation : ?cmp:('a -> 'a -> int) -> 'a array -> bool
     The time complexity is O(|a|).
   *)
 val next_subpermutation : ?cmp:('a -> 'a -> int) -> int -> 'a array -> bool
+
+(** Compute the next permutation of an array [a] in the lexicographic order.
+    Just return [false] if [a] is the last permutation;
+    otherwise modify [a] and return [true].
+
+    This function allows duplicate elements.
+
+    The time complexity is O(|a|).
+  *)
+val next_permutation : ?cmp:('a -> 'a -> int) -> 'a array -> bool
 
 (** Compute the next combination of an array [a] drawn from [from].
     Just return [false] if [a] is the last combination;
