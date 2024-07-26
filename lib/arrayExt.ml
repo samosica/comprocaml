@@ -19,6 +19,38 @@ let next_permutation ?(cmp = compare) a =
     true
   end
 
+let next_subpermutation ?(cmp = compare) n a =
+  let l = Array.length a in
+  let[@inline] rec f i =
+    if i = 0 then i
+    else if cmp a.(i - 1) a.(i) < 0 then i
+    else f (i - 1) in
+  let[@inline] rec g b j =
+    if cmp b a.(j) < 0 then j
+    else g b (j + 1) in
+  if n < l && cmp a.(n - 1) a.(l - 1) < 0 then begin
+    let j = g a.(n - 1) n in
+    Base.Array.swap a (n - 1) j;
+    true
+  end else begin
+    let i = f (n - 1) in
+    if i = 0 then false
+    else begin
+      (* sort a[i, l) *)
+      (* a[i, n) is decreasing and a[n, l) is increasing *)
+      (* a.(n - 1) >= a.(l - 1) *)
+      for k = 0 to (l - n) / 2 - 1 do
+        Base.Array.swap a (n + k) (l - 1 - k)
+      done;
+      for k = 0 to (l - i) / 2 - 1 do
+        Base.Array.swap a (i + k) (l - 1 - k)
+      done;
+      let j = g a.(i - 1) i in
+      Base.Array.swap a (i - 1) j;
+      true
+    end
+  end
+
 let next_combination ?(cmp = compare) ~from a =
   let len_from = Array.length from in
   let len_a = Array.length a in

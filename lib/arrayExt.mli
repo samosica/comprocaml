@@ -4,8 +4,24 @@ val replace : 'a array -> int -> ('a -> 'a) -> unit
 (** Compute the next permutation of an array [a] in the lexicographic order.
     Just return [false] if [a] is the last permutation;
     otherwise modify [a] and return [true].
+
+    This function allows duplicate elements.
   *)
 val next_permutation : ?cmp:('a -> 'a -> int) -> 'a array -> bool
+
+(** Compute the next *subpermutation* of an array [a] in the lexicographic order.
+    Just return [false] if [a] is the last subpermutation;
+    otherwise modify [a] and return [true].
+
+    The first (required) argument [n] specifies the type of subpermutations.
+    A subpermutation of type ([l], [n]) is an array of size [l] such that
+    the last [l - n] elements are sorted.
+
+    This function allows duplicate elements.
+
+    The time complexity is O(|a|).
+  *)
+val next_subpermutation : ?cmp:('a -> 'a -> int) -> int -> 'a array -> bool
 
 (** Compute the next combination of an array [a] drawn from [from].
     Just return [false] if [a] is the last combination;
