@@ -25,18 +25,20 @@ let inv i =
 let div i j =
   assert (j <> 0);
   mul i (inv j)
+let[@inline] rec pow_aux a n p =
+  if n = 0 then
+    p
+  else if n mod 2 = 1 then
+    pow_aux (mul a a) (n / 2) (mul p a)
+  else
+    pow_aux (mul a a) (n / 2) p
+let pow a n = pow_aux a n 1
+let neg i = if i > 0 then modulus - i else 0
 
 let (+%) i j = add i j
 let (-%) i j = sub i j
 let ( *% ) i j = mul i j
 let ( /% ) i j = div i j
-let (~-%) i = if i > 0 then modulus - i else 0
+let (^%) a n = pow a n
+let (~-%) i = neg i
 let (~/%) i = inv i
-let rec pow_aux a n p =
-  if n = 0 then
-    p
-  else if n mod 2 = 1 then
-    pow_aux (a *% a) (n / 2) (p *% a)
-  else
-    pow_aux (a *% a) (n / 2) p
-let[@inline] (^%) a n = pow_aux a n 1
