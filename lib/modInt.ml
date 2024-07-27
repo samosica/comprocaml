@@ -1,7 +1,7 @@
 open Math
 
 module type S = sig
-  type t
+  type t = private int
 
   val modulus : int
 
