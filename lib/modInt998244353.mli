@@ -1,7 +1,7 @@
 type t = private int
 
 (** = 998_244_353 *)
-val mo : int
+val modulus : int
 
 (** Returns an integer such that of_int i ≡ i (mod 998,244,353) and
     0 <= of_int i < 998,244,353.
