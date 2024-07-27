@@ -9,5 +9,3 @@ val divisor_pair_count : int -> int64
 val sieve : int -> bool array * int array
 
 val divisors : prime_factor:int array -> int -> int array
-
-val fact : int -> int
