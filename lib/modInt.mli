@@ -1,6 +1,7 @@
 module type S = sig
-  (* TODO: add modulus *)
   type t
+
+  val modulus : int
 
   val of_int : int -> t
   val to_int : t -> int
@@ -12,15 +13,17 @@ module type S = sig
   val sub : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t
+  val pow : t -> t -> t
+  val neg : t -> t
   val inv : t -> t  
 
   val (+%) : t -> t -> t
   val (-%) : t -> t -> t
   val ( *% ) : t -> t -> t
   val (/%) : t -> t -> t
-  val (~/%) : t -> t
   val (^%) : t -> int -> t
+  val (~-%) : t -> t
+  val (~/%) : t -> t
 end
 
-(* TODO: mo -> modulus ? *)
-module Make (_ : sig val mo : int end) : S
+module Make (_ : sig val modulus : int end) : S
