@@ -6,9 +6,8 @@ let rec rep n l =
   else
     List.concat_map (fun x -> List.map (List.cons x) (rep (n - 1) l)) l
 
-(* TODO: make b labeled *)
-let[@tail_mod_cons] rec digits n b =
+let[@tail_mod_cons] rec digits ~base n =
   if n = 0 then
     []
   else
-    n mod b :: digits (n / b) b
+    n mod base :: digits ~base (n / base)
