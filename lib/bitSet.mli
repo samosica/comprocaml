@@ -1,4 +1,4 @@
-type t
+type t = private int
 
 val empty : t
 val is_empty : t -> bool  
