@@ -18,6 +18,9 @@ val remove : int -> t -> t
     If [l] >= [r], return the empty set.
  *)
 val range : int -> int -> t
+
+(** [fullset n] is the set of all integers less than [n]. *)
+val fullset : int -> t
 val mem : int -> t -> bool
 val cardinal : t -> int
 
@@ -41,6 +44,9 @@ val subsets : ?start:t -> t -> t Iter.t
 
 (** Enumerate the subsets of a given set in decreasing order. *)
 val subsets_dec : t -> t Iter.t
+
+(** Enumerate all the subsets of a full set. *)
+val subsets_of_fullset : int -> t Iter.t
 
 val supersets : t -> t Iter.t
 

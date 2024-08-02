@@ -33,3 +33,9 @@ let%test "combinations(17, 8)" =
     BitSet.combinations ~n:17 ~k:8
     |> Iter.length in
   res = 24_310
+
+let%test "subsets_of_fullset(10)" =
+  let count =
+    BitSet.subsets_of_fullset 10
+    |> Iter.length in
+  count = 1024
