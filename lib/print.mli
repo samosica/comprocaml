@@ -135,7 +135,7 @@ val output_bits : w:int -> out_channel -> int -> unit
 (*  Note: the parameter [w] is required but not optional because
     - if [w] is optional, [output_bits] have to take an extra parameter,
       like [output_int_list], to make sure of the lack
-      (see https://ocaml.org/manual/5.2/lablexamples.html#s:optional-arguments), and
+      (see https://ocaml.org/manual/5.0/lablexamples.html#s:optional-arguments), and
     - in most cases, [w] is not omitted.
 *)
 
