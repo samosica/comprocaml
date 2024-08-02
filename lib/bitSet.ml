@@ -19,7 +19,7 @@ let[@inline] add i s =
 let[@inline] remove i s =
   assert (0 <= i && i < Sys.int_size);
   s -: singleton i
-let[@inline] iota l r =
+let[@inline] range l r =
   assert (0 <= l && l < Sys.int_size);
   assert (0 <= r && r <= Sys.int_size);
   if l < r then

@@ -1,5 +1,15 @@
 open Comprocaml
 
+let%test "range(3, 6)" =
+  let s = BitSet.range 3 6 in
+  Iter.(0 -- (Sys.int_size - 1))
+  |> Iter.for_all (fun i -> BitSet.mem i s = (3 <= i && i < 6))
+
+let%test "range(8, 6)" =
+  let s = BitSet.range 8 6 in
+  Iter.(0 -- (Sys.int_size - 1))
+  |> Iter.for_all (fun i -> BitSet.mem i s = false)
+
 let%test "fixed_size_sets(5, 3)" =
   let res =
     BitSet.fixed_size_sets ~n:5 ~k:3

@@ -12,7 +12,12 @@ val (|:) : t -> t -> t
 val (-:) : t -> t -> t
 val add : int -> t -> t
 val remove : int -> t -> t
-val iota : int -> int -> t
+
+(** [range l r] is the range from [l] (inclusive) to [r] (exclusive).
+
+    If [l] >= [r], return the empty set.
+ *)
+val range : int -> int -> t
 val mem : int -> t -> bool
 val cardinal : t -> int
 
