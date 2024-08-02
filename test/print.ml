@@ -128,3 +128,21 @@ let%expect_test "output_bits(10) with w = 7" =
   [%expect{|
     0001010
   |}]
+
+let%expect_test "output_bits_from_lsb(0)" =
+  Printf.printf "%a\n" (Print.output_bits_from_lsb ~w:0) 0;
+  [%expect{|
+    0
+  |}]
+
+let%expect_test "output_bits_from_lsb(10)" =
+  Printf.printf "%a\n" (Print.output_bits_from_lsb ~w:0) 10;
+  [%expect{|
+    0101
+  |}]
+
+let%expect_test "output_bits_from_lsb(10) with w = 7" =
+  Printf.printf "%a\n" (Print.output_bits_from_lsb ~w:7) 10;
+  [%expect{|
+    0101000
+  |}]

@@ -138,3 +138,13 @@ val output_bits : w:int -> out_channel -> int -> unit
       (see https://ocaml.org/manual/5.2/lablexamples.html#s:optional-arguments), and
     - in most cases, [w] is not omitted.
 *)
+
+(** Print an integer in binary representation.
+    It starts with the least significant bit.
+    The length is as short as possible but at least [w].
+
+    Usage:
+    - [Printf.printf "%a" (Print.output_bits_from_lsb ~w:0) 10] -> 0101
+    - [Printf.printf "%a" (Print.output_bits_from_lsb ~w:7) 10] -> 0101000
+  *)
+val output_bits_from_lsb : w:int -> out_channel -> int -> unit
