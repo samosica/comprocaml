@@ -19,13 +19,14 @@ let[@inline] add i s =
 let[@inline] remove i s =
   assert (0 <= i && i < Sys.int_size);
   s -: singleton i
-let[@inline] iota l r =
+let[@inline] range l r =
   assert (0 <= l && l < Sys.int_size);
   assert (0 <= r && r <= Sys.int_size);
   if l < r then
     (1 lsl (r - l) - 1) lsl l
   else
     0
+let[@inline] fullset n = range 0 n
 let[@inline] mem i s =
   0 <= i && i < Sys.int_size && s lsr i land 1 > 0
 let[@inline] cardinal s = Base.Int.popcount s
@@ -63,13 +64,19 @@ let subsets_dec s = Iter.from_iter (subsets_dec_aux s s)
 let[@inline] rec supersets_aux s s' k =
   k s';
   if s' <> -1 then supersets_aux s ((s' + 1) lor s) k
+let subsets_of_fullset n =
+  Iter.from_iter (fun k ->
+    for s = 0 to fullset n do
+      k s
+    done
+  )
 let supersets s = Iter.from_iter (supersets_aux s s)
 
-let[@inline] rec fixed_size_sets_aux ~n ~k s c =
+let[@inline] rec combinations_aux ~n ~k s c =
   c s;
   if s < (1 lsl k - 1) lsl (n - k) then begin
     let i = s + (s land -s) in
     let s' = i lor (1 lsl (k - Base.Int.popcount i) - 1) in
-    fixed_size_sets_aux ~n ~k s' c
+    combinations_aux ~n ~k s' c
   end
-let fixed_size_sets ~n ~k = Iter.from_iter (fixed_size_sets_aux ~n ~k (1 lsl k - 1))
+let combinations ~n ~k = Iter.from_iter (combinations_aux ~n ~k (1 lsl k - 1))
