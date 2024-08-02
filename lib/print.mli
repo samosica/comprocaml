@@ -123,11 +123,18 @@ val print_string_array :
 
 (* Bits *)
 (** Print an integer in binary representation.
-    The length is as short as possible,
-    and if [width] is specified, it is at least [width].
+    It starts with the most significant bit.
+    The length is as short as possible but at least [w].
 
     Usage:
-    - [Printf.printf "%a" (Print.output_bits()) 10] -> 1010
-    - [Printf.printf "%a" (Print.output_bits ~width:7 ()) 10] -> 0001010
+    - [Printf.printf "%a" (Print.output_bits ~w:0) 10] -> 1010
+    - [Printf.printf "%a" (Print.output_bits ~w:7) 10] -> 0001010
   *)
-val output_bits : ?width:int -> unit -> out_channel -> int -> unit
+val output_bits : w:int -> out_channel -> int -> unit
+
+(*  Note: the parameter [w] is required but not optional because
+    - if [w] is optional, [output_bits] have to take an extra parameter,
+      like [output_int_list], to make sure of the lack
+      (see https://ocaml.org/manual/5.2/lablexamples.html#s:optional-arguments), and
+    - in most cases, [w] is not omitted.
+*)
