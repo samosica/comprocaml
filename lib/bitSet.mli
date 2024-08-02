@@ -47,4 +47,4 @@ val supersets : t -> t Iter.t
 (** Enumerate sets of integers less than [n] with [k] elements.
     They are in the increasing order of their integer representations.
   *)
-val fixed_size_sets : n:int -> k:int -> t Iter.t
+val combinations : n:int -> k:int -> t Iter.t

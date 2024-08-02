@@ -65,11 +65,11 @@ let[@inline] rec supersets_aux s s' k =
   if s' <> -1 then supersets_aux s ((s' + 1) lor s) k
 let supersets s = Iter.from_iter (supersets_aux s s)
 
-let[@inline] rec fixed_size_sets_aux ~n ~k s c =
+let[@inline] rec combinations_aux ~n ~k s c =
   c s;
   if s < (1 lsl k - 1) lsl (n - k) then begin
     let i = s + (s land -s) in
     let s' = i lor (1 lsl (k - Base.Int.popcount i) - 1) in
-    fixed_size_sets_aux ~n ~k s' c
+    combinations_aux ~n ~k s' c
   end
-let fixed_size_sets ~n ~k = Iter.from_iter (fixed_size_sets_aux ~n ~k (1 lsl k - 1))
+let combinations ~n ~k = Iter.from_iter (combinations_aux ~n ~k (1 lsl k - 1))

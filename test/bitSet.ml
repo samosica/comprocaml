@@ -10,9 +10,9 @@ let%test "range(8, 6)" =
   Iter.(0 -- (Sys.int_size - 1))
   |> Iter.for_all (fun i -> BitSet.mem i s = false)
 
-let%test "fixed_size_sets(5, 3)" =
+let%test "combinations(5, 3)" =
   let res =
-    BitSet.fixed_size_sets ~n:5 ~k:3
+    BitSet.combinations ~n:5 ~k:3
     |> Iter.map BitSet.to_int
     |> Iter.to_list in
   res = [
@@ -28,8 +28,8 @@ let%test "fixed_size_sets(5, 3)" =
     0b11100; (* 10 *)
   ]
 
-let%test "fixed_size_sets(17, 8)" =
+let%test "combinations(17, 8)" =
   let res =
-    BitSet.fixed_size_sets ~n:17 ~k:8
+    BitSet.combinations ~n:17 ~k:8
     |> Iter.length in
   res = 24_310
