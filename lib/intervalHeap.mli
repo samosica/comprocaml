@@ -1,3 +1,8 @@
+(*
+  References:
+  - [Double-Ended Priority Queue - 週刊 spaghetti_source](https://topcoder-g-hatena-ne-jp.jag-icpc.org/spaghetti_source/20121006/1349491389.html). Retrieved 2024-08-06.
+*)
+
 module type S = sig
   type elt
   type t
