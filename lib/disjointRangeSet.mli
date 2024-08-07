@@ -1,6 +1,6 @@
 module Range : Set.OrderedType with type t = int * int
 
-include Set.S with type elt := Range.t
+include Set.S with type elt = Range.t
 
 exception Not_disjoint
 
