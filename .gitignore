@@ -8,3 +8,6 @@
 !dune-project
 !LICENSE
 !README.md
+!.github
+!.github/workflows
+!.github/workflows/*.yaml
