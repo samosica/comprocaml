@@ -15,7 +15,7 @@ jobs:
         os:
           - ubuntu-latest
         version:
-          - '4.12'
+          - '4.13'
           - '5.0'
     runs-on: ${{ matrix.os }}
     steps:
