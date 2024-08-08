@@ -18,7 +18,14 @@
 (package
  (name comprocaml)
  (synopsis "An OCaml library for competitive programming")
- (depends ocaml dune)
+ (depends
+  ; N.B. 5.0.0 <= 5.0 is not true
+  (ocaml (and (>= 4.13.0) (<= 5.0.0)))
+  dune
+  (base (>= v0.15))
+  (iter (>= 1.7))
+  (ppx_inline_test :with-test)
+  (ppx_expect :with-test))
  (tags
   ("competitive programming" "algorithms" "data structures")))
 
