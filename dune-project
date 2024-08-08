@@ -20,7 +20,7 @@
  (synopsis "An OCaml library for competitive programming")
  (depends
   ; N.B. 5.0.0 <= 5.0 is not true
-  (ocaml (and (>= 4.12.0) (<= 5.0.0)))
+  (ocaml (and (>= 4.13.0) (<= 5.0.0)))
   dune
   (base (>= v0.15))
   (iter (>= 1.7))
