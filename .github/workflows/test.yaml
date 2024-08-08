@@ -8,6 +8,7 @@ on:
       - 'test/**'
       - 'dune-project'
       - 'comprocaml.opam'
+      - '.github/workflows/test.yaml'
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
       - 'test/**'
       - 'dune-project'
       - 'comprocaml.opam'
+      - '.github/workflows/test.yaml'
   workflow_dispatch:
 jobs:
   test:
