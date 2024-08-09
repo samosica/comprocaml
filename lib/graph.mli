@@ -1,4 +1,5 @@
 type 'a graph = 'a list array
+type edge = { dest : int; cost : int }
 
 (** 連結成分ごとに分解する *)
 val decomp : int -> int list array -> int list list
@@ -23,3 +24,5 @@ val bfs : g:int graph -> dist:int array -> int Iter.t -> int Iter.t
   [unused]、[al.(v)]はソートされている必要がある
   *)
 val compl_bfs : int Queue.t -> int list -> int list array -> int array -> int Iter.t
+
+val dijkstra : g:edge graph -> dist:int array -> int Iter.t -> int Iter.t

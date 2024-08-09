@@ -1,4 +1,5 @@
 open Comprocaml
+open Graph
 
 let (let>) i f = Iter.flat_map f i
 
@@ -44,7 +45,7 @@ let%test "bfs(tree)" =
   dist.(0) <- 0;
   let ord =
     Iter.singleton 0
-    |> Graph.bfs ~g ~dist
+    |> bfs ~g ~dist
     |> Iter.to_array in
   let ok1 = dist = [| 0; 1; 1; 2; 2; 3; 2 |] in
   let ok2 =
@@ -62,7 +63,7 @@ let%test "bfs(rectangle)" =
   dist.(1) <- 0;
   let ord =
     Iter.singleton 1
-    |> Graph.bfs ~g ~dist
+    |> bfs ~g ~dist
     |> Iter.to_array in
   let ok1 = dist = [| 1; 0; 1; 2 |] in
   let ok2 =
@@ -70,3 +71,50 @@ let%test "bfs(rectangle)" =
       && Iter.(for_all (fun i -> Array.mem i ord) (0 -- (n - 1))) in
   let ok3 = valid_order ~n ~dist ord in
   ok1 && ok2 && ok3
+
+let%test "dijkstra(tree)" =
+  let n = 7 in
+  let g = Array.make n [] in
+  [
+    (0, 1, 2);
+    (0, 2, 1);
+    (1, 3, 3);
+    (1, 4, 1);
+    (2, 6, 3);
+    (4, 5, 3);
+  ] |> List.iter (fun (u, v, c) ->
+    ArrayExt.replace g u (List.cons { dest = v; cost = c });
+    ArrayExt.replace g v (List.cons { dest = u; cost = c });
+  );
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let ord =
+    Iter.singleton 0
+    |> dijkstra ~g ~dist
+    |> Iter.to_array in
+  let ok1 = dist = [| 0; 2; 1; 5; 3; 6; 4 |] in
+  (* no ambiguity *)
+  let ok2 = ord = [| 0; 2; 1; 4; 6; 3; 5 |] in
+  ok1 && ok2
+
+let%test "dijkstra(haste makes waste)" =
+  let n = 200 in
+  let g = Array.make n [] in
+  for v = 1 to n - 2 do
+    ArrayExt.replace g 0 (List.cons { dest = v; cost = v });
+    ArrayExt.replace g v (List.cons { dest = n - 1; cost = if v < n - 2 then 300 - v else 299 - v });
+  done;
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let ord =
+    Iter.singleton 0
+    |> dijkstra ~g ~dist
+    |> Iter.to_array in
+  let ok1 =
+    dist.(0) = 0
+      && dist.(n - 1) = 299
+      && Iter.(for_all (fun v -> dist.(v) = v) (1 -- (n - 2))) in
+  (* no ambiguity *)
+  let ok2 = ord = Array.init n Fun.id in
+  ok1 && ok2
+

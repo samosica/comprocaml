@@ -1,5 +1,5 @@
 type 'a graph = 'a list array
-(* TODO: add DFS *)
+type edge = { dest : int; cost : int }
 
 (* 連結成分ごとに分解する *)
 let decomp n al =
@@ -44,12 +44,12 @@ let rec tour p v c al in_ out =
 let bfs ~g ~dist start =
   let queue = Queue.create() in
   let rec bfs_aux k =
-  if not (Queue.is_empty queue) then begin
-    let v = Queue.pop queue in
-    k v;
+    if not (Queue.is_empty queue) then begin
+      let v = Queue.pop queue in
+      k v;
       g.(v) |> List.iter (fun w ->
         if dist.(w) = -1 then begin
-      dist.(w) <- dist.(v) + 1;
+          dist.(w) <- dist.(v) + 1;
           Queue.push w queue
         end
       );
@@ -91,3 +91,37 @@ let compl_bfs queue unused al dist =
   assert (Base.List.is_sorted ~compare:Int.compare unused);
   assert (Array.for_all (Base.List.is_sorted ~compare:Int.compare) al);
   Iter.from_iter @@ compl_bfs_aux queue unused al dist
+
+module IntPair = struct
+  type t = int * int
+  let compare (x, y) (x', y') =
+    match Int.compare x x' with
+    | 0 -> Int.compare y y'
+    | c -> c
+end
+module IntPairHeap = QuadHeap.Make (IntPair)
+
+let dijkstra ~g ~dist start =
+  (* TODO: adjust capacity *)
+  let queue = IntPairHeap.create ~cap:1 in
+  let rec dijkstra_aux k =
+    if not (IntPairHeap.is_empty queue) then begin
+      let d, v = IntPairHeap.min_elt queue in
+      IntPairHeap.remove_min queue;
+      if d <= dist.(v) then begin
+        k v;
+        g.(v) |> List.iter (fun e ->
+          let d' = d + e.cost in
+          if dist.(e.dest) = -1 || d' < dist.(e.dest) then begin
+            dist.(e.dest) <- d';
+            IntPairHeap.add (d', e.dest) queue
+          end
+        );
+        dijkstra_aux k
+      end
+    end in
+  start |> Iter.iter (fun v ->
+    assert (dist.(v) <> -1);
+    IntPairHeap.add (dist.(v), v) queue
+  );
+  Iter.from_iter dijkstra_aux
