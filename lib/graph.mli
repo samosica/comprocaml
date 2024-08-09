@@ -1,3 +1,5 @@
+type 'a graph = 'a list array
+
 (** 連結成分ごとに分解する *)
 val decomp : int -> int list array -> int list list
 
@@ -15,7 +17,7 @@ val compute_depth : int -> int -> int -> int list array -> int array -> unit
   *)
 val tour : int -> int -> int ref -> int list array -> int array -> int array -> unit
 
-val bfs : int Queue.t -> int list array -> int array -> int Iter.t
+val bfs : g:int graph -> dist:int array -> int Iter.t -> int Iter.t
 
 (** 補グラフ上の幅優先探索。
   [unused]、[al.(v)]はソートされている必要がある

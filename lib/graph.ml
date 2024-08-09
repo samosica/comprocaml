@@ -1,4 +1,4 @@
-(* TODO: make parameters such as al labeled *)
+type 'a graph = 'a list array
 (* TODO: add DFS *)
 
 (* 連結成分ごとに分解する *)
@@ -41,20 +41,25 @@ let rec tour p v c al in_ out =
   out.(v) <- !c;
   incr c
 
-let rec bfs_aux queue al dist k =
+let bfs ~g ~dist start =
+  let queue = Queue.create() in
+  let rec bfs_aux k =
   if not (Queue.is_empty queue) then begin
     let v = Queue.pop queue in
     k v;
-    Iter.of_list al.(v)
-    |> Iter.filter (fun w -> dist.(w) = -1)
-    |> Iter.iter (fun w ->
+      g.(v) |> List.iter (fun w ->
+        if dist.(w) = -1 then begin
       dist.(w) <- dist.(v) + 1;
-      Queue.add w queue
-    );
-    bfs_aux queue al dist k
-  end
-
-let bfs queue al dist = Iter.from_iter @@ bfs_aux queue al dist
+          Queue.push w queue
+        end
+      );
+      bfs_aux k
+    end in
+  start |> Iter.iter (fun v ->
+    assert (dist.(v) <> -1);
+    Queue.push v queue
+  );
+  Iter.from_iter bfs_aux
 
 let rec compl_bfs_aux queue unused al dist k =
   if not @@ Queue.is_empty queue then begin
