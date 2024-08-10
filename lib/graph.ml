@@ -18,15 +18,6 @@ let decomp n al =
     done in
   !cs
 
-(* それぞれの頂点の深さを計算する *)
-(* i 番目の頂点の深さは depth.(i) に格納される *)
-(* 使用方法: compute_depth (-1) (起点) 0 (隣接リスト) depth *)
-let rec compute_depth p v d al depth =
-  depth.(v) <- d;
-  List.iter (fun w ->
-    if w <> p then compute_depth v w (d + 1) al depth
-  ) al.(v)
-
 (* Euler tour を計算する *)
 (* in_.(i) には i 番目の頂点に入ったタイミングが記録される *)
 (* out.(i) には i 番目の頂点から出て行ったタイミングが記録される *)

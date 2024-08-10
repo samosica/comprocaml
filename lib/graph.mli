@@ -4,12 +4,6 @@ type edge = { dest : int; cost : int }
 (** 連結成分ごとに分解する *)
 val decomp : int -> int list array -> int list list
 
-(** それぞれの頂点の深さを計算する。
-    i 番目の頂点の深さは depth.(i) に格納される。
-    使用方法: compute_depth (-1) (起点) 0 (隣接リスト) depth
-  *)
-val compute_depth : int -> int -> int -> int list array -> int array -> unit
-
 (** Euler tour を計算する。
     in_.(i) には i 番目の頂点に入ったタイミングが記録される。
     out.(i) には i 番目の頂点から出て行ったタイミングが記録される。
