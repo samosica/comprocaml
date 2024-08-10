@@ -32,7 +32,7 @@ let rec tour p v c al in_ out =
   out.(v) <- !c;
   incr c
 
-let bfs ~g ~dist start =
+let bfs ~g ~dist ?from start =
   let queue = Queue.create() in
   let rec bfs_aux k =
     if not (Queue.is_empty queue) then begin
@@ -41,7 +41,8 @@ let bfs ~g ~dist start =
       g.(v) |> List.iter (fun w ->
         if dist.(w) = -1 then begin
           dist.(w) <- dist.(v) + 1;
-          Queue.push w queue
+          Queue.push w queue;
+          Option.iter (fun from -> from.(w) <- v) from
         end
       );
       bfs_aux k
@@ -52,7 +53,7 @@ let bfs ~g ~dist start =
   );
   Iter.from_iter bfs_aux
 
-let rec compl_bfs_aux ~g ~dist ~unused queue k =
+let rec compl_bfs_aux ~g ~dist ~unused ?from queue k =
   if not (Queue.is_empty queue) then begin
     let v = Queue.pop queue in
     k v;
@@ -70,12 +71,13 @@ let rec compl_bfs_aux ~g ~dist ~unused queue k =
         (* x ∉ al.(v) なので、v から x に移動できる *)
         Queue.add x queue;
         dist.(x) <- dist.(v) + 1;
+        Option.iter (fun from -> from.(x) <- v) from;
         loop unused' al in
     loop unused g.(v);
-    compl_bfs_aux ~g ~dist ~unused:(List.rev !next_unused) queue k
+    compl_bfs_aux ~g ~dist ~unused:(List.rev !next_unused) ?from queue k
   end
 
-let compl_bfs ~g ~dist start =
+let compl_bfs ~g ~dist ?from start =
   assert (Array.for_all (Base.List.is_sorted ~compare:Int.compare) g);
   let unused =
     Iter.(0 -- (Array.length g - 1))
@@ -86,7 +88,7 @@ let compl_bfs ~g ~dist start =
     assert (dist.(v) <> -1);
     Queue.push v queue
   );
-  Iter.from_iter @@ compl_bfs_aux ~g ~dist ~unused queue
+  Iter.from_iter @@ compl_bfs_aux ~g ~dist ~unused ?from queue
 
 module IntPair = struct
   type t = int * int
@@ -97,7 +99,7 @@ module IntPair = struct
 end
 module IntPairHeap = QuadHeap.Make (IntPair)
 
-let dijkstra ~g ~dist start =
+let dijkstra ~g ~dist ?from start =
   (* TODO: adjust capacity *)
   let queue = IntPairHeap.create ~cap:1 in
   let rec dijkstra_aux k =
@@ -110,7 +112,8 @@ let dijkstra ~g ~dist start =
           let d' = d + e.cost in
           if dist.(e.dest) = -1 || d' < dist.(e.dest) then begin
             dist.(e.dest) <- d';
-            IntPairHeap.add (d', e.dest) queue
+            IntPairHeap.add (d', e.dest) queue;
+            Option.iter (fun from -> from.(e.dest) <- v) from
           end
         );
         dijkstra_aux k
