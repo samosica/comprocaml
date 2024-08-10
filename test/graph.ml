@@ -118,3 +118,68 @@ let%test "dijkstra(haste makes waste)" =
   let ok2 = ord = Array.init n Fun.id in
   ok1 && ok2
 
+let%test "compl_bfs rejects not sorted adjacency list" =
+  let g = [|
+    [2; 1];
+    [0; 2];
+    [0; 1];
+  |] in
+  let dist = [| 0; -1; -1 |] in
+  try
+    Iter.singleton 0
+    |> compl_bfs ~g ~dist
+    |> Iter.iter ignore;
+    false
+  with
+    Assert_failure(_, _, _) -> true
+
+let%test "compl_bfs(path)" =
+  (* the complement graph of [g] is the path 0 -> 2 -> 3 -> 1 *)
+  let g = [|
+    [1; 3];
+    [0; 2];
+    [1];
+    [0];
+  |] in
+  let dist = [| 0; -1; -1; -1 |] in
+  let ord =
+    Iter.singleton 0
+    |> compl_bfs ~g ~dist
+    |> Iter.to_list in
+  dist = [| 0; 3; 1; 2 |]
+    && ord = [0; 2; 3; 1] (* no ambiguity *)
+
+let%test "compl_bfs(directed)" =
+  let n = 4 in
+  (*
+    the complement graph of [g] is the path 0 -> 1 -> 2 -> 3
+    with an edge from 1 to 3
+  *)
+  let g = [|
+    [2; 3];
+    [];
+    [0];
+    [0; 1];
+  |] in
+  let dist = [| 0; -1; -1; -1 |] in
+  let ord =
+    Iter.singleton 0
+    |> compl_bfs ~g ~dist
+    |> Iter.to_list in
+  dist = [| 0; 1; 2; 2 |]
+    && Iter.(for_all (fun i -> List.mem i ord) (0 -- (n - 1)))
+    && Base.List.is_sorted ~compare:(fun v w -> Int.compare dist.(v) dist.(w)) ord
+
+let%test "compl_bfs(complete graph)" =
+  let n = 4 in
+  (* the complement graph of [g] has no edge *)
+  let g =
+    Array.init n @@ fun i ->
+      List.init n Fun.id |> List.filter ((<>) i) in
+  let dist = [| 0; -1; -1; -1 |] in
+  let ord =
+    Iter.singleton 0
+    |> compl_bfs ~g ~dist
+    |> Iter.to_list in
+  dist = [| 0; -1; -1; -1 |]
+    && ord = [0] (* no ambiguity *)

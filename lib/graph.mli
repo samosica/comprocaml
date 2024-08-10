@@ -20,9 +20,10 @@ val tour : int -> int -> int ref -> int list array -> int array -> int array -> 
 
 val bfs : g:int graph -> dist:int array -> int Iter.t -> int Iter.t
 
-(** 補グラフ上の幅優先探索。
-  [unused]、[al.(v)]はソートされている必要がある
+(** Breadth-first search on a complement graph.
+
+    [g.(v)] must be sorted in increasing order for each [v].
   *)
-val compl_bfs : int Queue.t -> int list -> int list array -> int array -> int Iter.t
+val compl_bfs : g:int list array -> dist:int array -> int Iter.t -> int Iter.t
 
 val dijkstra : g:edge graph -> dist:int array -> int Iter.t -> int Iter.t

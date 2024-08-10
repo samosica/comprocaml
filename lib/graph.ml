@@ -61,9 +61,10 @@ let bfs ~g ~dist start =
   );
   Iter.from_iter bfs_aux
 
-let rec compl_bfs_aux queue unused al dist k =
-  if not @@ Queue.is_empty queue then begin
+let rec compl_bfs_aux ~g ~dist ~unused queue k =
+  if not (Queue.is_empty queue) then begin
     let v = Queue.pop queue in
+    k v;
     let next_unused = ref [] in
     let rec loop unused al =
       match unused, al with
@@ -78,19 +79,23 @@ let rec compl_bfs_aux queue unused al dist k =
         (* x ∉ al.(v) なので、v から x に移動できる *)
         Queue.add x queue;
         dist.(x) <- dist.(v) + 1;
-        k x;
         loop unused' al in
-    loop unused al.(v);
-    compl_bfs_aux queue (List.rev !next_unused) al dist k
+    loop unused g.(v);
+    compl_bfs_aux ~g ~dist ~unused:(List.rev !next_unused) queue k
   end
 
-(** 補グラフ上の幅優先探索。
-  [unused]、[al.(v)]はソートされている必要がある
-  *)
-let compl_bfs queue unused al dist =
-  assert (Base.List.is_sorted ~compare:Int.compare unused);
-  assert (Array.for_all (Base.List.is_sorted ~compare:Int.compare) al);
-  Iter.from_iter @@ compl_bfs_aux queue unused al dist
+let compl_bfs ~g ~dist start =
+  assert (Array.for_all (Base.List.is_sorted ~compare:Int.compare) g);
+  let unused =
+    Iter.(0 -- (Array.length g - 1))
+    |> Iter.filter (fun v -> dist.(v) = -1)
+    |> Iter.to_list in
+  let queue = Queue.create() in
+  start |> Iter.iter (fun v ->
+    assert (dist.(v) <> -1);
+    Queue.push v queue
+  );
+  Iter.from_iter @@ compl_bfs_aux ~g ~dist ~unused queue
 
 module IntPair = struct
   type t = int * int
