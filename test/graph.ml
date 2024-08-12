@@ -1,6 +1,126 @@
 open Comprocaml
 open Graph
 
+type 'a order_spec =
+| Literal of 'a
+| InOrder of 'a order_spec list
+| Swappable of 'a order_spec * 'a order_spec
+
+let rec valid_orders = function
+| Literal l -> [[l]]
+| InOrder [] -> [[]]
+| InOrder (sp :: spl) ->
+  valid_orders sp |> List.concat_map (fun l1 ->
+    valid_orders (InOrder spl) |> List.map (fun l2 ->
+      l1 @ l2
+    )
+  )
+| Swappable (sp1, sp2) -> 
+  valid_orders (InOrder [sp1; sp2]) @ valid_orders (InOrder [sp2; sp1])
+
+let is_valid l sp = List.mem l (valid_orders sp)
+
+let%test "dfs(binary tree)" =
+  let n = 8 in
+  let g = 
+    Array.init n @@ fun i ->
+      (if i > 0 then [(i - 1) / 2] else [])
+        @ List.filter (fun i -> i < n) [i * 2 + 1; i * 2 + 2] in
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let from = Array.make n (-1) in
+  let ord =
+    0
+    |> dfs ~g ~dist ~from
+    |> Iter.to_list in
+  let sp =
+    InOrder([
+      Literal(0);
+      Swappable(
+        InOrder([
+          Literal(1);
+          Swappable(
+            InOrder([
+              Literal(3);
+              Literal(7);
+            ]),
+            Literal(4)
+          );
+        ]),
+        InOrder([
+          Literal(2);
+          Swappable(
+            Literal(5),
+            Literal(6)
+          );
+        ])
+      );
+    ]) in
+  Iter.(for_all (fun v -> dist.(v) = Base.Int.floor_log2 (v + 1)) (0 -- (n - 1)))
+    && is_valid ord sp
+    && from.(0) = -1
+    && Iter.(for_all (fun v -> from.(v) = (v - 1) / 2) (1 -- (n - 1)))
+
+let interleave v sp =
+  InOrder([Literal (`Enter v)] @ sp @ [Literal (`Leave v)])
+
+let%test "dfs_inout(binary tree)" =
+  let n = 8 in
+  let g = 
+    Array.init n @@ fun i ->
+      (if i > 0 then [(i - 1) / 2] else [])
+        @ List.filter (fun i -> i < n) [i * 2 + 1; i * 2 + 2] in
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let from = Array.make n (-1) in
+  let ord =
+    0
+    |> dfs_inout ~g ~dist ~from
+    |> Iter.to_list in
+  let sp =
+    interleave 0 [
+      Swappable(
+        interleave 1 [
+          Swappable(
+            interleave 3 [
+              interleave 7 [];
+            ],
+            interleave 4 []
+          );
+        ],
+        interleave 2 [
+          Swappable(
+            interleave 5 [],
+            interleave 6 []
+          );
+        ]
+      );
+    ] in
+  Iter.(for_all (fun v -> dist.(v) = Base.Int.floor_log2 (v + 1)) (0 -- (n - 1)))
+    && is_valid ord sp
+    && from.(0) = -1
+    && Iter.(for_all (fun v -> from.(v) = (v - 1) / 2) (1 -- (n - 1)))
+
+let%test "tour(binary tree)" =
+  let n = 8 in
+  let g = 
+    Array.init n @@ fun i ->
+      (if i > 0 then [(i - 1) / 2] else [])
+        @ List.filter (fun i -> i < n) [i * 2 + 1; i * 2 + 2] in
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let ord =
+    0
+    |> dfs_inout ~g ~dist
+    |> Iter.to_list in
+  let in_ = Array.make n (-1) in
+  let out = Array.make n (-1) in
+  Iter.of_list ord |> tour ~in_ ~out;
+  Base.List.is_sorted ~compare:(fun ev1 ev2 ->
+    let get_time = function | `Enter v -> in_.(v) | `Leave v -> out.(v) in
+    Int.compare (get_time ev1) (get_time ev2)
+  ) ord
+
 let%test "bfs(tree)" =
   let n = 7 in
   let g = [|

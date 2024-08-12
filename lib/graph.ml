@@ -18,19 +18,70 @@ let decomp n al =
     done in
   !cs
 
-(* Euler tour を計算する *)
-(* in_.(i) には i 番目の頂点に入ったタイミングが記録される *)
-(* out.(i) には i 番目の頂点から出て行ったタイミングが記録される *)
-(* in_, out を使うと LCA を計算したり、木上で1点更新、パスクエリが実装できる *)
-(* 使用方法: tour (-1) (起点) (ref 0) (隣接リスト) in_ out *)
-let rec tour p v c al in_ out =
-  in_.(v) <- !c;
-  incr c;
-  List.iter (fun w ->
-    if w <> p then tour v w c al in_ out
-  ) al.(v);
-  out.(v) <- !c;
-  incr c
+let dfs ~g ~dist ?from start =
+  let stack = Stack.create() in
+  let rec dfs_aux k =
+    if not (Stack.is_empty stack) then begin
+      let v = Stack.pop stack in
+      k v;
+      g.(v) |> List.iter (fun w ->
+        if dist.(w) = -1 then begin
+          dist.(w) <- dist.(v) + 1;
+          Stack.push w stack;
+          Option.iter (fun from -> from.(w) <- v) from
+        end
+      );
+      dfs_aux k
+    end in
+  assert (dist.(start) <> -1);
+  Stack.push start stack;
+  Iter.from_iter dfs_aux
+
+type inout_event = [`Enter of int | `Leave of int]
+
+let dfs_inout ~g ~dist ?from start =
+  (*
+    Internally, events are represented as (node index) * 2 + (event type)
+    (event type 0 for entrances, and 1 for exits) for efficiency.
+    Other representations ((polymorphic) variants and tuples) were
+    1.2 to 1.35 times slower for 10^7 nodes.
+  *)
+  let stack = Stack.create() in
+  let rec dfs_aux k =
+    if not (Stack.is_empty stack) then begin
+      let ev = Stack.pop stack in
+      let t = ev land 1 in
+      let v = ev lsr 1 in
+      (match t with
+      | 0 ->
+        k (`Enter v);
+        Stack.push (ev lor 1) stack;
+        g.(v) |> List.iter (fun w ->
+          if dist.(w) = -1 then begin
+            dist.(w) <- dist.(v) + 1;
+            Stack.push (w lsl 1) stack;
+            Option.iter (fun from -> from.(w) <- v) from
+          end
+        )
+      | _ -> k (`Leave v));
+      dfs_aux k
+    end in
+  assert (dist.(start) <> -1);
+  Stack.push (start lsl 1) stack;
+  Iter.from_iter dfs_aux
+
+let tour ~in_ ~out ord =
+  let count = ref 0 in
+  ord
+  |> Iter.iter (fun ev ->
+    match ev with
+    | `Enter v ->
+      in_.(v) <- !count;
+      incr count
+    | `Leave v ->
+      out.(v) <- !count;
+      incr count
+  )
 
 let bfs ~g ~dist ?from start =
   let queue = Queue.create() in
@@ -74,6 +125,7 @@ let rec compl_bfs_aux ~g ~dist ~unused ?from queue k =
         Option.iter (fun from -> from.(x) <- v) from;
         loop unused' al in
     loop unused g.(v);
+    (* List.length next_unused <= List.length g.(v) *)
     compl_bfs_aux ~g ~dist ~unused:(List.rev !next_unused) ?from queue k
   end
 
