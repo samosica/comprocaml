@@ -24,11 +24,11 @@ let dfs ~g ~dist ?from start =
     if not (Stack.is_empty stack) then begin
       let v, p = Stack.pop stack in
       if p = -1 || dist.(v) = -1 then begin
-        k v;
         if p <> -1 then begin
           dist.(v) <- dist.(p) + 1;
           Option.iter (fun from -> from.(v) <- p) from
         end;
+        k v;
         g.(v) |> List.iter (fun w ->
           if dist.(w) = -1 then Stack.push (w, v) stack
         );
@@ -59,12 +59,12 @@ let dfs_inout ~g ~dist ?from start =
       (match t with
       | 0 ->
         if p = -1 || dist.(v) = -1 then begin
-          k (`Enter v);
-          Stack.push (ev lor 1) stack;          
           if p <> -1 then begin
             dist.(v) <- dist.(p) + 1;
             Option.iter (fun from -> from.(v) <- p) from
           end;
+          k (`Enter v);
+          Stack.push (ev lor 1) stack;
           g.(v) |> List.iter (fun w ->
             if dist.(w) = -1 then Stack.push ((v lsl 32) lor (w lsl 1)) stack
           )

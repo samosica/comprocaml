@@ -6,6 +6,9 @@ val decomp : int -> int list array -> int list list
 
 (** Depth-first search.
 
+    Return an iterator of nodes which are sorted in a DFS order.
+    When it yields node [v], [dist.(v)] and [from.(v)] are guaranteed to be determined.
+
     After running [dfs ~g ~dist ~from start], [from.(v)] is the parent of [v] in a DFS
     tree rooted at [start] if [v] is reachable from [start] and is not [start].
   *)
@@ -14,6 +17,9 @@ val dfs : g:int graph -> dist:int array -> ?from:int array -> int -> int Iter.t
 type inout_event = [`Enter of int | `Leave of int]
 
 (** Depth-first search with tracking entrance and exit events.
+
+    Return an iterator of events.
+    When it yields [`Enter v], [dist.(v)] and [from.(v)] are guaranteed to be determined.
 
     After running [dfs ~g ~dist ~from start], [from.(v)] is the parent of [v] in a DFS
     tree rooted at [start] if [v] is reachable from [start] and is not [start].
@@ -38,6 +44,9 @@ val tour : in_:int array -> out:int array -> inout_event Iter.t -> unit
 
 (** Breadth-first search.
 
+    Return an iterator of nodes which are sorted in a BFS order.
+    When it yields node [v], [dist.(v)] and [from.(v)] are guaranteed to be determined.
+
     After running [bfs ~g ~dist ~from start], [from.(v)] is the last node but one
     in a shortest path from [start] to [v] if [v] is reachable from [start] and
     is not included in [start].
@@ -48,6 +57,9 @@ val bfs : g:int graph -> dist:int array -> ?from:int array -> int Iter.t -> int 
 
     [g.(v)] must be sorted in increasing order for each [v].
 
+    Return an iterator of nodes which are sorted in a BFS order.
+    When it yields node [v], [dist.(v)] and [from.(v)] are guaranteed to be determined.
+
     After running [compl_bfs ~g ~dist ~from start], [from.(v)] is the last node but one
     in a shortest path from [start] to [v] if [v] is reachable from [start] and
     is not included in [start].
@@ -57,6 +69,9 @@ val bfs : g:int graph -> dist:int array -> ?from:int array -> int Iter.t -> int 
 val compl_bfs : g:int list array -> dist:int array -> ?from:int array -> int Iter.t -> int Iter.t
 
 (** Dijkstra's algorithm.
+
+    Return an iterator of nodes which are sorted by their distances from starting nodes.
+    When it yields node [v], [dist.(v)] and [from.(v)] are guaranteed to be determined.
 
     After running [dijkstra ~g ~dist ~from start], [from.(v)] is the last node but one
     in a shortest path from [start] to [v] if [v] is reachable from [start] and
