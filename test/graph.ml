@@ -61,8 +61,28 @@ let%test "dfs(binary tree)" =
     && from.(0) = -1
     && Iter.(for_all (fun v -> from.(v) = (v - 1) / 2) (1 -- (n - 1)))
 
-let interleave v sp =
-  InOrder([Literal (`Enter v)] @ sp @ [Literal (`Leave v)])
+let%test "dfs(hexagon)" =
+  let n = 6 in
+  let g = 
+    Array.init n @@ fun i ->
+      [(i + 1) mod n; (i + n - 1) mod n] in
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let from = Array.make n (-1) in
+  let ord =
+    0
+    |> dfs ~g ~dist ~from
+    |> Iter.to_list in
+  (
+    dist = [| 0; 1; 2; 3; 4; 5 |]
+    && from = [| -1; 0; 1; 2; 3; 4 |]
+    && ord = [0; 1; 2; 3; 4; 5]
+  )
+    || (
+      dist = [| 0; 5; 4; 3; 2; 1 |]
+      && from = [| -1; 2; 3; 4; 5; 0 |]
+      && ord = [0; 5; 4; 3; 2; 1]
+    )
 
 let%test "dfs_inout(binary tree)" =
   let n = 8 in
@@ -77,6 +97,8 @@ let%test "dfs_inout(binary tree)" =
     0
     |> dfs_inout ~g ~dist ~from
     |> Iter.to_list in
+  let interleave v sp =
+    InOrder([Literal (`Enter v)] @ sp @ [Literal (`Leave v)]) in
   let sp =
     interleave 0 [
       Swappable(
@@ -100,6 +122,30 @@ let%test "dfs_inout(binary tree)" =
     && is_valid ord sp
     && from.(0) = -1
     && Iter.(for_all (fun v -> from.(v) = (v - 1) / 2) (1 -- (n - 1)))
+
+let%test "dfs_inout(hexagon)" =
+  let n = 6 in
+  let g = 
+    Array.init n @@ fun i ->
+      [(i + 1) mod n; (i + n - 1) mod n] in
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let from = Array.make n (-1) in
+  let ord =
+    0
+    |> dfs_inout ~g ~dist ~from
+    |> Iter.to_list in
+  let interleave v l = [`Enter v] @ l @ [`Leave v] in
+  (
+    dist = [| 0; 1; 2; 3; 4; 5 |]
+    && from = [| -1; 0; 1; 2; 3; 4 |]
+    && ord = List.fold_right interleave [0; 1; 2; 3; 4; 5] []
+  )
+    || (
+      dist = [| 0; 5; 4; 3; 2; 1 |]
+      && from = [| -1; 2; 3; 4; 5; 0 |]
+      && ord = List.fold_right interleave [0; 5; 4; 3; 2; 1] []
+    )
 
 let%test "tour(binary tree)" =
   let n = 8 in

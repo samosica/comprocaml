@@ -22,52 +22,58 @@ let dfs ~g ~dist ?from start =
   let stack = Stack.create() in
   let rec dfs_aux k =
     if not (Stack.is_empty stack) then begin
-      let v = Stack.pop stack in
-      k v;
-      g.(v) |> List.iter (fun w ->
-        if dist.(w) = -1 then begin
-          dist.(w) <- dist.(v) + 1;
-          Stack.push w stack;
-          Option.iter (fun from -> from.(w) <- v) from
-        end
-      );
+      let v, p = Stack.pop stack in
+      if p = -1 || dist.(v) = -1 then begin
+        k v;
+        if p <> -1 then begin
+          dist.(v) <- dist.(p) + 1;
+          Option.iter (fun from -> from.(v) <- p) from
+        end;
+        g.(v) |> List.iter (fun w ->
+          if dist.(w) = -1 then Stack.push (w, v) stack
+        );
+      end;
       dfs_aux k
     end in
   assert (dist.(start) <> -1);
-  Stack.push start stack;
+  Stack.push (start, -1) stack;
   Iter.from_iter dfs_aux
 
 type inout_event = [`Enter of int | `Leave of int]
 
 let dfs_inout ~g ~dist ?from start =
   (*
-    Internally, events are represented as (node index) * 2 + (event type)
+    Internally, events are compactly represented as
+      (parent node index) * 2^32 + (node index) * 2 + (event type)
     (event type 0 for entrances, and 1 for exits) for efficiency.
     Other representations ((polymorphic) variants and tuples) were
-    1.2 to 1.35 times slower for 10^7 nodes.
+    1.23 to 1.32 times slower for 10^7 nodes.
   *)
   let stack = Stack.create() in
   let rec dfs_aux k =
     if not (Stack.is_empty stack) then begin
       let ev = Stack.pop stack in
       let t = ev land 1 in
-      let v = ev lsr 1 in
+      let v = (ev lsr 1) land 0x7fffffff in
+      let p = ev asr 32 in
       (match t with
       | 0 ->
-        k (`Enter v);
-        Stack.push (ev lor 1) stack;
-        g.(v) |> List.iter (fun w ->
-          if dist.(w) = -1 then begin
-            dist.(w) <- dist.(v) + 1;
-            Stack.push (w lsl 1) stack;
-            Option.iter (fun from -> from.(w) <- v) from
-          end
-        )
+        if p = -1 || dist.(v) = -1 then begin
+          k (`Enter v);
+          Stack.push (ev lor 1) stack;          
+          if p <> -1 then begin
+            dist.(v) <- dist.(p) + 1;
+            Option.iter (fun from -> from.(v) <- p) from
+          end;
+          g.(v) |> List.iter (fun w ->
+            if dist.(w) = -1 then Stack.push ((v lsl 32) lor (w lsl 1)) stack
+          )
+        end
       | _ -> k (`Leave v));
       dfs_aux k
     end in
   assert (dist.(start) <> -1);
-  Stack.push (start lsl 1) stack;
+  Stack.push (((-1) lsl 32) lor (start lsl 1)) stack;
   Iter.from_iter dfs_aux
 
 let tour ~in_ ~out ord =
