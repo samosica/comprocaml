@@ -89,6 +89,50 @@ let tour ~in_ ~out ord =
       incr count
   )
 
+let lowlink ~g ~dist ?from ~ord ~low start =
+  (*
+    Internally, events are compactly represented as
+      (parent node index) * 2^32 + (node index) * 2 + (event type)
+    (event type 0 for entrances, and 1 for exits) for efficiency.
+  *)
+  let stack = Stack.create() in
+  let count = ref 0 in
+  let rec dfs_aux k =
+    if not (Stack.is_empty stack) then begin
+      let ev = Stack.pop stack in
+      let t = ev land 1 in
+      let v = (ev lsr 1) land 0x7fffffff in
+      let p = ev asr 32 in
+      (match t with
+      | 0 ->
+        if p = -1 || dist.(v) = -1 then begin
+          ord.(v) <- !count;
+          low.(v) <- !count;
+          incr count;
+          if p <> -1 then begin
+            dist.(v) <- dist.(p) + 1;
+            Option.iter (fun from -> from.(v) <- p) from
+          end;
+          k (`Enter v);          
+          Stack.push (ev lor 1) stack;
+          g.(v) |> List.iter (fun w ->
+            if dist.(w) = -1 then begin
+              Stack.push ((v lsl 32) lor (w lsl 1)) stack;
+            end else begin
+              low.(v) <- Int.min low.(v) ord.(w)
+            end
+          )
+        end
+      | _ ->
+        if p <> -1 then low.(p) <- Int.min low.(p) low.(v);
+        k (`Leave v);
+      );
+      dfs_aux k
+    end in
+  assert (dist.(start) <> -1);
+  Stack.push (((-1) lsl 32) lor (start lsl 1)) stack;
+  Iter.from_iter dfs_aux
+
 let bfs ~g ~dist ?from start =
   let queue = Queue.create() in
   let rec bfs_aux k =

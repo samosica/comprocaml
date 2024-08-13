@@ -205,6 +205,66 @@ let%test "tour(binary tree)" =
     Int.compare (get_time ev1) (get_time ev2)
   ) ord
 
+let%test "lowlink(hexagon)" =
+  let n = 6 in
+  let g = 
+    Array.init n @@ fun i ->
+      [(i + 1) mod n; (i + n - 1) mod n] in
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let from = Array.make n (-1) in
+  let ord = Array.make n (-1) in
+  let low = Array.make n (-1) in
+  lowlink ~g ~dist ~from ~ord ~low 0 |> Iter.iter ignore;
+  (
+    dist = [| 0; 1; 2; 3; 4; 5 |]
+    && from = [| -1; 0; 1; 2; 3; 4 |]
+    && ord = [| 0; 1; 2; 3; 4; 5 |]
+    && low = [| 0; 0; 0; 0; 0; 0 |]
+  )
+    || (
+      dist = [| 0; 5; 4; 3; 2; 1 |]
+      && from = [| -1; 2; 3; 4; 5; 0 |]
+      && ord = [| 0; 5; 4; 3; 2; 1 |]
+      && low = [| 0; 0; 0; 0; 0; 0 |]
+    )
+
+let%test "lowlink(hexagon): check intermediate state" =
+  let n = 6 in
+  let g = 
+    Array.init n @@ fun i ->
+      [(i + 1) mod n; (i + n - 1) mod n] in
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let from = Array.make n (-1) in
+  let ord = Array.make n (-1) in
+  let low = Array.make n (-1) in
+  let dist_ent = Array.make n (-1) in
+  let from_ent = Array.make n (-1) in
+  let ord_ent = Array.make n (-1) in
+  let low_ex = Array.make n (-1) in
+  lowlink ~g ~dist ~from ~ord ~low 0
+  |> Iter.iter (function
+    | `Enter v ->
+      dist_ent.(v) <- dist.(v);
+      from_ent.(v) <- from.(v);
+      ord_ent.(v) <- ord.(v)
+    | `Leave v ->
+      low_ex.(v) <- low.(v)
+  );
+  (
+    dist_ent = [| 0; 1; 2; 3; 4; 5 |]
+    && from_ent = [| -1; 0; 1; 2; 3; 4 |]
+    && ord_ent = [| 0; 1; 2; 3; 4; 5 |]
+    && low_ex = [| 0; 0; 0; 0; 0; 0 |]
+  )
+    || (
+      dist_ent = [| 0; 5; 4; 3; 2; 1 |]
+      && from_ent = [| -1; 2; 3; 4; 5; 0 |]
+      && ord_ent = [| 0; 5; 4; 3; 2; 1 |]
+      && low_ex = [| 0; 0; 0; 0; 0; 0 |]
+    )
+
 let%test "bfs(tree)" =
   let n = 7 in
   let g = [|

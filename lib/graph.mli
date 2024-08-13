@@ -42,6 +42,23 @@ val dfs_inout : g:int graph -> dist:int array -> ?from:int array -> int -> inout
   *)
 val tour : in_:int array -> out:int array -> inout_event Iter.t -> unit
 
+(** Low link.
+
+    Return an iterator of entrance and exit events.
+    When it yields [`Enter v], [dist.(v)], [from.(v)], and [ord.(v)] are guaranteed to be determined.
+    When it yields [`Leave v], [low.(v)] is guaranteed to be determined.
+
+    After running [lowlink ~g ~dist ~from ~ord ~low start],
+    - [ord.(v)] is how many nodes are visited before [v].
+    - [low.(v)] is the minimum [ord] of nodes reachable from the subtree rooted at [v]
+      using at most one back edge.
+    - [from.(v)] is the parent of [v] in a DFS tree rooted at [start] if [v] is
+      reachable from [start] and is not [start].
+  *)
+val lowlink :
+  g:int graph -> dist:int array -> ?from:int array ->
+    ord:int array -> low:int array -> int -> inout_event Iter.t
+
 (** Breadth-first search.
 
     Return an iterator of nodes which are sorted in a BFS order.
