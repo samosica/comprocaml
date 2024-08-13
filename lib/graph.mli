@@ -21,7 +21,7 @@ type inout_event = [`Enter of int | `Leave of int]
     Return an iterator of events.
     When it yields [`Enter v], [dist.(v)] and [from.(v)] are guaranteed to be determined.
 
-    After running [dfs ~g ~dist ~from start], [from.(v)] is the parent of [v] in a DFS
+    After running [dfs_inout ~g ~dist ~from start], [from.(v)] is the parent of [v] in a DFS
     tree rooted at [start] if [v] is reachable from [start] and is not [start].
   *)
 val dfs_inout : g:int graph -> dist:int array -> ?from:int array -> int -> inout_event Iter.t
