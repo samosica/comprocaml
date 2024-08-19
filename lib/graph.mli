@@ -44,6 +44,9 @@ val tour : in_:int array -> out:int array -> inout_event Iter.t -> unit
 
 (** Low link.
 
+    Beware: this function does not compute the low links for some nodes
+    if they are unreachable from a starting node. If necessary, use [lowlink] instead.
+
     Return an iterator of entrance and exit events.
     When it yields [`Enter v], [dist.(v)], [from.(v)], and [ord.(v)] are guaranteed to be determined.
     When it yields [`Leave v], [low.(v)] is guaranteed to be determined.
@@ -55,9 +58,17 @@ val tour : in_:int array -> out:int array -> inout_event Iter.t -> unit
     - [from.(v)] is the parent of [v] in a DFS tree rooted at [start] if [v] is
       reachable from [start] and is not [start].
   *)
-val lowlink :
+val lowlink_one :
   g:int graph -> dist:int array -> ?from:int array ->
     ord:int array -> low:int array -> int -> inout_event Iter.t
+
+(** Low link.
+
+    In contract to [lowlink_one], this function computes all low links every time.
+  *)
+val lowlink :
+  g:int graph -> dist:int array -> ?from:int array ->
+    ord:int array -> low:int array -> inout_event Iter.t
 
 (** Breadth-first search.
 

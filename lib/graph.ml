@@ -89,7 +89,7 @@ let tour ~in_ ~out ord =
       incr count
   )
 
-let lowlink ~g ~dist ?from ~ord ~low start =
+let lowlink_one ~g ~dist ?from ~ord ~low start =
   (*
     Internally, events are compactly represented as
       (parent node index) * 2^32 + (node index) * 2 + (event type)
@@ -132,6 +132,11 @@ let lowlink ~g ~dist ?from ~ord ~low start =
   assert (dist.(start) <> -1);
   Stack.push (((-1) lsl 32) lor (start lsl 1)) stack;
   Iter.from_iter dfs_aux
+
+let lowlink ~g ~dist ?from ~ord ~low =
+  Iter.(0 -- (Array.length g - 1))
+  |> Iter.filter (fun v -> dist.(v) = -1)
+  |> Iter.flat_map (fun v -> dist.(v) <- 0; lowlink_one ~g ~dist ?from ~ord ~low v)
 
 let bfs ~g ~dist ?from start =
   let queue = Queue.create() in
