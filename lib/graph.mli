@@ -1,3 +1,10 @@
+(*
+  References:
+  - Strongly connected components
+    - [Tarjan's strongly connected components algorithm - Wikipedia](https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm). Retrieved 2024-08-20.
+    - [ac-library/atcoder/internal_scc.hpp at fe9b6fca9ab4e1be946ea23a4e6a2a751cf4aaa2 · atcoder/ac-library](https://github.com/atcoder/ac-library/blob/fe9b6fca9ab4e1be946ea23a4e6a2a751cf4aaa2/atcoder/internal_scc.hpp). Retrieved 2024-08-20.
+*)
+
 type 'a graph = 'a list array
 type edge = { dest : int; cost : int }
 
