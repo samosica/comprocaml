@@ -138,6 +138,25 @@ let lowlink ~g ~dist ?from ~ord ~low =
   |> Iter.filter (fun v -> dist.(v) = -1)
   |> Iter.flat_map (fun v -> dist.(v) <- 0; lowlink_one ~g ~dist ?from ~ord ~low v)
 
+let scc ~ord ~low seq =
+  let stack = Stack.create() in
+  let rec pop_until v l =
+    if Stack.is_empty stack then
+      l
+    else
+      let w = Stack.pop stack in
+      if w = v then
+        v :: l
+      else
+        pop_until v (w :: l) in
+  seq
+  |> Iter.fold (fun comps ev ->
+    match ev with
+    | `Enter v -> Stack.push v stack; comps
+    | `Leave v when low.(v) = ord.(v) -> pop_until v [] :: comps
+    | _ -> comps
+  ) []
+
 let bfs ~g ~dist ?from start =
   let queue = Queue.create() in
   let rec bfs_aux k =

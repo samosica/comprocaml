@@ -278,6 +278,27 @@ let%test "lowlink(two independent nodes)" =
     && low = [| 0; 0 |]
     && ord' = [| `Enter 0; `Leave 0; `Enter 1; `Leave 1 |]
 
+let%test "scc(two components)" =
+  let n = 6 in
+  let g = [|
+    [1];
+    [2];
+    [0; 3];
+    [4];
+    [5];
+    [3];
+  |] in
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let ord = Array.make n (-1) in
+  let low = Array.make n (-1) in
+  let comps =
+    lowlink_one ~g ~dist ~ord ~low 0
+    |> scc ~ord ~low
+    |> List.map (List.sort Int.compare)
+    |> List.sort (fun c c' -> Int.compare (List.hd c) (List.hd c')) in
+  comps = [[0; 1; 2]; [3; 4; 5]]
+
 let%test "bfs(tree)" =
   let n = 7 in
   let g = [|

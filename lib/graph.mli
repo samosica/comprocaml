@@ -70,6 +70,16 @@ val lowlink :
   g:int graph -> dist:int array -> ?from:int array ->
     ord:int array -> low:int array -> inout_event Iter.t
 
+(** Strongly connected components.
+    
+    This function is intended to be combined with [lowlink]; for example,
+    {[
+      lowlink ~g ~dist ~ord ~low |> scc ~ord ~low
+    ]}
+  *)
+val scc :
+  ord:int array -> low:int array -> inout_event Iter.t -> int list list
+
 (** Breadth-first search.
 
     Return an iterator of nodes which are sorted in a BFS order.
