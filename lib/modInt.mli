@@ -13,7 +13,7 @@ module type S = sig
   val sub : t -> t -> t
   val mul : t -> t -> t
   val div : t -> t -> t
-  val pow : t -> t -> t
+  val pow : t -> int -> t
   val neg : t -> t
   val inv : t -> t  
 
