@@ -241,9 +241,9 @@ let dijkstra ~g ~dist ?from start =
             IntPairHeap.add (d', e.dest) queue;
             Option.iter (fun from -> from.(e.dest) <- v) from
           end
-        );
-        dijkstra_aux k
-      end
+        )
+      end;
+      dijkstra_aux k
     end in
   start |> Iter.iter (fun v ->
     assert (dist.(v) <> -1);

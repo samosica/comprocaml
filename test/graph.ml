@@ -436,6 +436,36 @@ let%test "dijkstra(haste makes waste): check intermediate state" =
   );
   !ok
 
+(*
+  Note: this testcase is intended to detect the bug that
+  immediately terminates [dijkstra] when it obtains a node [v]
+  with a tentative distance [d], and [d] is graeter than [dist.(v)].
+*)
+let%test "dijkstra(diamond and needle)" =
+  let n = 6 in
+  let g = Array.make n [] in
+  [
+    (0, 1, 1);
+    (0, 2, 2);
+    (1, 3, 3);
+    (2, 3, 1);
+    (3, 4, 2);
+    (4, 5, 1);
+  ] |> List.iter (fun (u, v, c) ->
+    ArrayExt.replace g u (List.cons { dest = v; cost = c });
+    ArrayExt.replace g v (List.cons { dest = u; cost = c });
+  );
+  let dist = Array.make n (-1) in
+  dist.(0) <- 0;
+  let from = Array.make n (-1) in
+  let ord =
+    Iter.singleton 0
+    |> dijkstra ~g ~dist ~from
+    |> Iter.to_array in
+  dist = [| 0; 1; 2; 3; 5; 6 |]
+    && ord = [| 0; 1; 2; 3; 4; 5 |] (* no ambiguity *)
+    && from = [| -1; 0; 0; 2; 3; 4 |] (* no ambiguity *)
+
 let%test "compl_bfs rejects not sorted adjacency list" =
   let g = [|
     [2; 1];
