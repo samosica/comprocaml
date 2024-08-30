@@ -25,6 +25,7 @@ module Make (M : Set.OrderedType) : S with type elt = M.t = struct
 
   let extend a =
     let l = Base.Option_array.length a in
+    (* Note: if [l] = 1 + 4^1 + ... + 4^n), then [4 * l + 1] = 1 + 4^1 + ... + 4^{n+1}. *)
     Base.Option_array.init (4 * l + 1) ~f:(fun i ->
       if i < l then Base.Option_array.unsafe_get a i else None
     )
@@ -33,12 +34,10 @@ module Make (M : Set.OrderedType) : S with type elt = M.t = struct
   let[@inline] is_full h = h.count = Base.Option_array.length h.data
 
   let create ~cap =
-    let h = { data = Base.Option_array.create ~len:1; count = 0 } in
-    let rec loop () =
-      if Base.Option_array.length h.data < cap then begin
-        extend h; loop ()
-      end in
-    loop(); h
+    (* See the comment in [extend]. *)
+    let rec compute_len l =
+      if l < cap then compute_len (4 * l + 1) else l in
+    { data = Base.Option_array.create ~len:(compute_len 1); count = 0 }
 
   let rec go_up i h =
     let p = (i - 1) / 4 in
