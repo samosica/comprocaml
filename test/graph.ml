@@ -439,7 +439,7 @@ let%test "dijkstra(haste makes waste): check intermediate state" =
 (*
   Note: this testcase is intended to detect the bug that
   immediately terminates [dijkstra] when it obtains a node [v]
-  with a tentative distance [d], and [d] is graeter than [dist.(v)].
+  with a tentative distance [d], and [d] is greater than [dist.(v)].
 *)
 let%test "dijkstra(diamond and needle)" =
   let n = 6 in
