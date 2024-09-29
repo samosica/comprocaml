@@ -25,7 +25,7 @@ module Make (M : Set.OrderedType) : S with type elt = M.t = struct
 
   let extend a =
     let l = Base.Option_array.length a in
-    (* Note: if [l] = 1 + 4^1 + ... + 4^n), then [4 * l + 1] = 1 + 4^1 + ... + 4^{n+1}. *)
+    (* Note: if [l] = 1 + 4^1 + ... + 4^n, then [4 * l + 1] = 1 + 4^1 + ... + 4^{n+1}. *)
     Base.Option_array.init (4 * l + 1) ~f:(fun i ->
       if i < l then Base.Option_array.unsafe_get a i else None
     )
