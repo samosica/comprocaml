@@ -113,11 +113,11 @@ let lowlink_one ~g ~dist ?from ~ord ~low start =
             dist.(v) <- dist.(p) + 1;
             Option.iter (fun from -> from.(v) <- p) from
           end;
-          k (`Enter v);          
+          k (`Enter v);
           Stack.push (ev lor 1) stack;
           g.(v) |> List.iter (fun w ->
             if dist.(w) = -1 then begin
-              Stack.push ((v lsl 32) lor (w lsl 1)) stack;
+              Stack.push ((v lsl 32) lor (w lsl 1)) stack
             end else begin
               low.(v) <- Int.min low.(v) ord.(w)
             end
@@ -152,8 +152,22 @@ let scc ~ord ~low seq =
   seq
   |> Iter.fold (fun comps ev ->
     match ev with
-    | `Enter v -> Stack.push v stack; comps
-    | `Leave v when low.(v) = ord.(v) -> pop_until v [] :: comps
+    | `Enter v ->
+      (* すべての ord.(v)、low.(v) から同じ値を引いておく *)
+      ord.(v) <- ord.(v) - Array.length ord;
+      low.(v) <- low.(v) - Array.length ord;
+      Stack.push v stack;
+      comps
+    | `Leave v when low.(v) = ord.(v) ->
+      (*
+        上で引いた値を足しなおす。そうすることで、探索途中の頂点の
+        low.(-) を計算するときに ord.(v) が影響を与えないようにする。
+        こうしないと有向グラフが与えられたときに間違った結果が
+        得られることがある。具体例は test/graph.ml の dp_g にある。
+      *)
+      ord.(v) <- ord.(v) + Array.length ord;
+      low.(v) <- low.(v) + Array.length ord;
+      pop_until v [] :: comps
     | _ -> comps
   ) []
 
