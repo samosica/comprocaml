@@ -15,14 +15,14 @@ let rec valid_orders = function
       l1 @ l2
     )
   )
-| Swappable (sp1, sp2) -> 
+| Swappable (sp1, sp2) ->
   valid_orders (InOrder [sp1; sp2]) @ valid_orders (InOrder [sp2; sp1])
 
 let is_valid l sp = List.mem l (valid_orders sp)
 
 let%test "dfs(binary tree)" =
   let n = 8 in
-  let g = 
+  let g =
     Array.init n @@ fun i ->
       (if i > 0 then [(i - 1) / 2] else [])
         @ List.filter (fun i -> i < n) [i * 2 + 1; i * 2 + 2] in
@@ -63,7 +63,7 @@ let%test "dfs(binary tree)" =
 
 let%test "dfs(binary tree): check intermediate state" =
   let n = 8 in
-  let g = 
+  let g =
     Array.init n @@ fun i ->
       (if i > 0 then [(i - 1) / 2] else [])
         @ List.filter (fun i -> i < n) [i * 2 + 1; i * 2 + 2] in
@@ -81,7 +81,7 @@ let%test "dfs(binary tree): check intermediate state" =
 
 let%test "dfs(hexagon)" =
   let n = 6 in
-  let g = 
+  let g =
     Array.init n @@ fun i ->
       [(i + 1) mod n; (i + n - 1) mod n] in
   let dist = Array.make n (-1) in
@@ -104,7 +104,7 @@ let%test "dfs(hexagon)" =
 
 let%test "dfs_inout(binary tree)" =
   let n = 8 in
-  let g = 
+  let g =
     Array.init n @@ fun i ->
       (if i > 0 then [(i - 1) / 2] else [])
         @ List.filter (fun i -> i < n) [i * 2 + 1; i * 2 + 2] in
@@ -143,7 +143,7 @@ let%test "dfs_inout(binary tree)" =
 
 let%test "dfs_inout(binary tree): check intermediate state" =
   let n = 8 in
-  let g = 
+  let g =
     Array.init n @@ fun i ->
       (if i > 0 then [(i - 1) / 2] else [])
         @ List.filter (fun i -> i < n) [i * 2 + 1; i * 2 + 2] in
@@ -163,7 +163,7 @@ let%test "dfs_inout(binary tree): check intermediate state" =
 
 let%test "dfs_inout(hexagon)" =
   let n = 6 in
-  let g = 
+  let g =
     Array.init n @@ fun i ->
       [(i + 1) mod n; (i + n - 1) mod n] in
   let dist = Array.make n (-1) in
@@ -187,7 +187,7 @@ let%test "dfs_inout(hexagon)" =
 
 let%test "tour(binary tree)" =
   let n = 8 in
-  let g = 
+  let g =
     Array.init n @@ fun i ->
       (if i > 0 then [(i - 1) / 2] else [])
         @ List.filter (fun i -> i < n) [i * 2 + 1; i * 2 + 2] in
@@ -207,7 +207,7 @@ let%test "tour(binary tree)" =
 
 let%test "lowlink_one(hexagon)" =
   let n = 6 in
-  let g = 
+  let g =
     Array.init n @@ fun i ->
       [(i + 1) mod n; (i + n - 1) mod n] in
   let dist = Array.make n (-1) in
@@ -231,7 +231,7 @@ let%test "lowlink_one(hexagon)" =
 
 let%test "lowlink_one(hexagon): check intermediate state" =
   let n = 6 in
-  let g = 
+  let g =
     Array.init n @@ fun i ->
       [(i + 1) mod n; (i + n - 1) mod n] in
   let dist = Array.make n (-1) in
