@@ -299,6 +299,27 @@ let%test "scc(two components)" =
     |> List.sort (fun c c' -> Int.compare (List.hd c) (List.hd c')) in
   comps = [[0; 1; 2]; [3; 4; 5]]
 
+let%test "scc(dp_g)" =
+  let n = 4 in
+  (* The input graph is retrieved from <https://atcoder.jp/contests/dp/tasks/dp_g>. *)
+  let g = [|
+    [1; 2];
+    [3];
+    [1; 3];
+    [];
+  |] in
+  let dist = Array.make n (-1) in
+  let ord = Array.make n (-1) in
+  let low = Array.make n (-1) in
+  let comps =
+    lowlink ~g ~dist ~ord ~low
+    |> scc ~ord ~low
+    |> List.map (List.sort Int.compare)
+    |> List.sort (fun c c' -> Int.compare (List.hd c) (List.hd c')) in
+  ord = [| 0; 3; 1; 2 |]
+    && low = [| 0; 3; 1; 2 |]
+    && comps = [[0]; [1]; [2]; [3]]
+
 let%test "bfs(tree)" =
   let n = 7 in
   let g = [|
