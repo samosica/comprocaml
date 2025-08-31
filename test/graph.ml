@@ -320,7 +320,7 @@ let%test "scc(dp_g)" =
     && low = [| 0; 3; 1; 2 |]
     && comps = [[0]; [1]; [2]; [3]]
 
-let%test "scc()" =
+let%test "scc(bug)" =
   let n = 5 in
   let g = [|
     [1];
