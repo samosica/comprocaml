@@ -114,6 +114,13 @@ let lowlink_one ~g ~dist ?from ~ord ~low start =
             Option.iter (fun from -> from.(v) <- p) from
           end;
           k (`Enter v);
+          (*
+            すべての ord.(v)、low.(v) から同じ値を引いておく。
+            `Enter v を出した後でないと、それをイテレーターから
+            受け取った時点で2つの値が負になってしまう。
+          *)
+          ord.(v) <- ord.(v) - Array.length g;
+          low.(v) <- low.(v) - Array.length g;
           Stack.push (ev lor 1) stack;
           g.(v) |> List.iter (fun w ->
             if dist.(w) = -1 then begin
@@ -125,6 +132,14 @@ let lowlink_one ~g ~dist ?from ~ord ~low start =
         end
       | _ ->
         if p <> -1 then low.(p) <- Int.min low.(p) low.(v);
+        (*
+          上で引いた値を足しなおす。そうすることで、探索途中の頂点の
+          low.(-) を計算するときに ord.(v) が影響を与えないようにする。
+          こうしないと有向グラフが与えられたときに間違った結果が
+          得られることがある。具体例は test/graph.ml の dp_g にある。
+        *)
+        ord.(v) <- ord.(v) + Array.length g;
+        low.(v) <- low.(v) + Array.length g;
         k (`Leave v);
       );
       dfs_aux k
@@ -137,23 +152,6 @@ let lowlink ~g ~dist ?from ~ord ~low =
   Iter.(0 -- (Array.length g - 1))
   |> Iter.filter (fun v -> dist.(v) = -1)
   |> Iter.flat_map (fun v -> dist.(v) <- 0; lowlink_one ~g ~dist ?from ~ord ~low v)
-  |> Iter.map (fun ev ->
-    (match ev with
-    | `Enter v ->
-      (* すべての ord.(v)、low.(v) から同じ値を引いておく *)
-      ord.(v) <- ord.(v) - Array.length ord;
-      low.(v) <- low.(v) - Array.length ord
-    | `Leave v ->
-      (*
-        上で引いた値を足しなおす。そうすることで、探索途中の頂点の
-        low.(-) を計算するときに ord.(v) が影響を与えないようにする。
-        こうしないと有向グラフが与えられたときに間違った結果が
-        得られることがある。具体例は test/graph.ml の dp_g にある。
-      *)
-      ord.(v) <- ord.(v) + Array.length ord;
-      low.(v) <- low.(v) + Array.length ord);
-    ev
-  )
 
 let scc ~ord ~low seq =
   let stack = Stack.create() in
