@@ -137,6 +137,23 @@ let lowlink ~g ~dist ?from ~ord ~low =
   Iter.(0 -- (Array.length g - 1))
   |> Iter.filter (fun v -> dist.(v) = -1)
   |> Iter.flat_map (fun v -> dist.(v) <- 0; lowlink_one ~g ~dist ?from ~ord ~low v)
+  |> Iter.map (fun ev ->
+    (match ev with
+    | `Enter v ->
+      (* すべての ord.(v)、low.(v) から同じ値を引いておく *)
+      ord.(v) <- ord.(v) - Array.length ord;
+      low.(v) <- low.(v) - Array.length ord
+    | `Leave v ->
+      (*
+        上で引いた値を足しなおす。そうすることで、探索途中の頂点の
+        low.(-) を計算するときに ord.(v) が影響を与えないようにする。
+        こうしないと有向グラフが与えられたときに間違った結果が
+        得られることがある。具体例は test/graph.ml の dp_g にある。
+      *)
+      ord.(v) <- ord.(v) + Array.length ord;
+      low.(v) <- low.(v) + Array.length ord);
+    ev
+  )
 
 let scc ~ord ~low seq =
   let stack = Stack.create() in
@@ -153,20 +170,9 @@ let scc ~ord ~low seq =
   |> Iter.fold (fun comps ev ->
     match ev with
     | `Enter v ->
-      (* すべての ord.(v)、low.(v) から同じ値を引いておく *)
-      ord.(v) <- ord.(v) - Array.length ord;
-      low.(v) <- low.(v) - Array.length ord;
       Stack.push v stack;
       comps
     | `Leave v when low.(v) = ord.(v) ->
-      (*
-        上で引いた値を足しなおす。そうすることで、探索途中の頂点の
-        low.(-) を計算するときに ord.(v) が影響を与えないようにする。
-        こうしないと有向グラフが与えられたときに間違った結果が
-        得られることがある。具体例は test/graph.ml の dp_g にある。
-      *)
-      ord.(v) <- ord.(v) + Array.length ord;
-      low.(v) <- low.(v) + Array.length ord;
       pop_until v [] :: comps
     | _ -> comps
   ) []

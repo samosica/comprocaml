@@ -320,6 +320,26 @@ let%test "scc(dp_g)" =
     && low = [| 0; 3; 1; 2 |]
     && comps = [[0]; [1]; [2]; [3]]
 
+let%test "scc()" =
+  let n = 5 in
+  let g = [|
+    [1];
+    [0];
+    [3];
+    [4];
+    [1];
+  |] in
+  let dist = Array.make n (-1) in
+  let ord = Array.make n (-1) in
+  let low = Array.make n (-1) in
+  let comps =
+    lowlink ~g ~dist ~ord ~low
+    |> scc ~ord ~low
+    |> List.map (List.sort Int.compare) in
+  ord = [| 0; 1; 0; 1; 2 |]
+    && low = [| 0; 0; 0; 1; 2 |]
+    && comps = [[2]; [3]; [4]; [0; 1]]
+
 let%test "bfs(tree)" =
   let n = 7 in
   let g = [|
