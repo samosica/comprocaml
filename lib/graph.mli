@@ -60,8 +60,8 @@ val tour : in_:int array -> out:int array -> inout_event Iter.t -> unit
 
     After running [lowlink ~g ~dist ~from ~ord ~low start],
     - [ord.(v)] is how many nodes are visited before [v].
-    - [low.(v)] is the minimum [ord] of nodes reachable from the subtree rooted at [v]
-      using at most one back edge.
+    - [low.(v)] is the minimum [ord] of nodes reachable from [v] using edges in
+      a DFS tree and at most one back edge.
     - [from.(v)] is the parent of [v] in a DFS tree rooted at [start] if [v] is
       reachable from [start] and is not [start].
   *)
@@ -78,7 +78,7 @@ val lowlink :
     ord:int array -> low:int array -> inout_event Iter.t
 
 (** Strongly connected components.
-    
+
     This function is intended to be combined with [lowlink]; for example,
     {[
       lowlink ~g ~dist ~ord ~low |> scc ~ord ~low
