@@ -75,6 +75,11 @@ val lowlink :
 
 (** Strongly connected components.
 
+    Return a list of strongly connected components.
+    For all strongly connected components [c1] and [c2], if [c2] is reachable from
+    [c1], then [c1] occurs before [c2] in the list.
+    N.B. this order is the reverse of the order in [lowlink].
+
     This function is intended to be combined with [lowlink]; for example,
     {[
       lowlink ~g ~dist ~ord ~low |> scc
