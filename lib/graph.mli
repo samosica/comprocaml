@@ -49,43 +49,43 @@ val dfs_inout : g:int graph -> dist:int array -> ?from:int array -> int -> inout
   *)
 val tour : in_:int array -> out:int array -> inout_event Iter.t -> unit
 
-(** Low link.
+type lowlink_event = [inout_event | `End_of_component of int list]
 
-    Beware: this function does not compute the low links for some nodes
-    if they are unreachable from a starting node. If necessary, use [lowlink] instead.
+(** Low link for all nodes.
 
-    Return an iterator of entrance and exit events.
-    When it yields [`Enter v], [dist.(v)], [from.(v)], and [ord.(v)] are guaranteed to be determined.
+    Return an iterator of entrance, exit, and end-of-component events.
+    When it yields [`Enter v], [dist.(v)], [from.(v)] are guaranteed to be determined.
+    In addition, [ord.(v)] becomes the right value, but after that, it will not be
+    guaranteed until the end of the execution.
     When it yields [`Leave v], [low.(v)] is guaranteed to be determined.
+    When it yields [`End_of_component c], [c] is one of strongly connected components.
+    For all strongly connected components [c1] and [c2], if [c2] is reachable from
+    [c1], then [`End_of_component c2] will occur before [`End_of_component c1].
 
-    After running [lowlink ~g ~dist ~from ~ord ~low start],
+    After running [lowlink ~g ~dist ~from ~ord ~low],
     - [ord.(v)] is how many nodes are visited before [v].
-    - [low.(v)] is the minimum [ord] of nodes reachable from the subtree rooted at [v]
-      using at most one back edge.
-    - [from.(v)] is the parent of [v] in a DFS tree rooted at [start] if [v] is
-      reachable from [start] and is not [start].
-  *)
-val lowlink_one :
-  g:int graph -> dist:int array -> ?from:int array ->
-    ord:int array -> low:int array -> int -> inout_event Iter.t
-
-(** Low link.
-
-    In contract to [lowlink_one], this function computes all low links every time.
+    - [low.(v)] is the minimum [ord] of nodes reachable from [v] using edges in
+      a DFS tree and at most one back edge.
+    - [from.(v)] is the parent of [v] in a DFS tree if [v] is not the root of
+      the DFS tree; otherwise -1.
   *)
 val lowlink :
   g:int graph -> dist:int array -> ?from:int array ->
-    ord:int array -> low:int array -> inout_event Iter.t
+    ord:int array -> low:int array -> lowlink_event Iter.t
 
 (** Strongly connected components.
-    
+
+    Return a list of strongly connected components.
+    For all strongly connected components [c1] and [c2], if [c2] is reachable from
+    [c1], then [c1] occurs before [c2] in the list.
+    N.B. this order is the reverse of the order in [lowlink].
+
     This function is intended to be combined with [lowlink]; for example,
     {[
-      lowlink ~g ~dist ~ord ~low |> scc ~ord ~low
+      lowlink ~g ~dist ~ord ~low |> scc
     ]}
   *)
-val scc :
-  ord:int array -> low:int array -> inout_event Iter.t -> int list list
+val scc : lowlink_event Iter.t -> int list list
 
 (** Breadth-first search.
 
