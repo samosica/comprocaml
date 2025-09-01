@@ -205,37 +205,46 @@ let%test "tour(binary tree)" =
     Int.compare (get_time ev1) (get_time ev2)
   ) ord
 
-let%test "lowlink_one(hexagon)" =
+let%test "lowlink(hexagon)" =
   let n = 6 in
   let g =
     Array.init n @@ fun i ->
       [(i + 1) mod n; (i + n - 1) mod n] in
   let dist = Array.make n (-1) in
-  dist.(0) <- 0;
   let from = Array.make n (-1) in
   let ord = Array.make n (-1) in
   let low = Array.make n (-1) in
-  lowlink_one ~g ~dist ~from ~ord ~low 0 |> Iter.iter ignore;
+  let events =
+    lowlink ~g ~dist ~from ~ord ~low
+    |> Iter.map (function
+      | `End_of_component comp -> `End_of_component (List.sort Int.compare comp)
+      | ev -> ev
+    )
+    |> Iter.to_list in
+  let inv_ord = Array.make n 0 in
+  for v = 0 to n - 1 do
+    inv_ord.(ord.(v)) <- v
+  done;
   (
-    dist = [| 0; 1; 2; 3; 4; 5 |]
-    && from = [| -1; 0; 1; 2; 3; 4 |]
-    && ord = [| 0; 1; 2; 3; 4; 5 |]
-    && low = [| 0; 0; 0; 0; 0; 0 |]
+    Iter.(for_all (fun i -> ord.((i + 1) mod n) = (ord.(i) + 1) mod n) (0 -- (n - 1)))
+      || Iter.(for_all (fun i -> ord.(i) = (ord.((i + 1) mod n) + 1) mod n) (0 -- (n - 1)))
   )
-    || (
-      dist = [| 0; 5; 4; 3; 2; 1 |]
-      && from = [| -1; 2; 3; 4; 5; 0 |]
-      && ord = [| 0; 5; 4; 3; 2; 1 |]
-      && low = [| 0; 0; 0; 0; 0; 0 |]
+    && Iter.(for_all (fun i -> dist.(inv_ord.(i)) = i) (0 -- (n - 1)))
+    && from.(inv_ord.(0)) = -1
+    && Iter.(for_all (fun i -> from.(inv_ord.(i)) = inv_ord.(i - 1)) (1 -- (n - 1)))
+    && low = [| 0; 0; 0; 0; 0; 0 |]
+    && events = (
+      (Array.to_list inv_ord |> List.map (fun v -> `Enter v))
+        @ (Array.to_list inv_ord |> List.rev |> List.map (fun v -> `Leave v))
+        @ [`End_of_component [0; 1; 2; 3; 4; 5]]
     )
 
-let%test "lowlink_one(hexagon): check intermediate state" =
+let%test "lowlink(hexagon): check intermediate state" =
   let n = 6 in
   let g =
     Array.init n @@ fun i ->
       [(i + 1) mod n; (i + n - 1) mod n] in
   let dist = Array.make n (-1) in
-  dist.(0) <- 0;
   let from = Array.make n (-1) in
   let ord = Array.make n (-1) in
   let low = Array.make n (-1) in
@@ -243,7 +252,7 @@ let%test "lowlink_one(hexagon): check intermediate state" =
   let from_ent = Array.make n (-1) in
   let ord_ent = Array.make n (-1) in
   let low_ex = Array.make n (-1) in
-  lowlink_one ~g ~dist ~from ~ord ~low 0
+  lowlink ~g ~dist ~from ~ord ~low
   |> Iter.iter (function
     | `Enter v ->
       dist_ent.(v) <- dist.(v);
@@ -251,19 +260,10 @@ let%test "lowlink_one(hexagon): check intermediate state" =
       ord_ent.(v) <- ord.(v)
     | `Leave v ->
       low_ex.(v) <- low.(v)
+    | `End_of_component _ -> ()
   );
-  (
-    dist_ent = [| 0; 1; 2; 3; 4; 5 |]
-    && from_ent = [| -1; 0; 1; 2; 3; 4 |]
-    && ord_ent = [| 0; 1; 2; 3; 4; 5 |]
-    && low_ex = [| 0; 0; 0; 0; 0; 0 |]
-  )
-    || (
-      dist_ent = [| 0; 5; 4; 3; 2; 1 |]
-      && from_ent = [| -1; 2; 3; 4; 5; 0 |]
-      && ord_ent = [| 0; 5; 4; 3; 2; 1 |]
-      && low_ex = [| 0; 0; 0; 0; 0; 0 |]
-    )
+  (* the correctness of dist, from, ord, and low has already been tested in lowlink(hexagon) *)
+  dist_ent = dist && from_ent = from && ord_ent = ord && low_ex = low
 
 let%test "lowlink(two independent nodes)" =
   let n = 2 in
@@ -273,10 +273,32 @@ let%test "lowlink(two independent nodes)" =
   let ord = Array.make n (-1) in
   let low = Array.make n (-1) in
   let ord' = lowlink ~g ~dist ~from ~ord ~low |> Iter.to_array in
-  from = [| -1; -1 |]
-    && ord = [| 0; 0 |]
-    && low = [| 0; 0 |]
-    && ord' = [| `Enter 0; `Leave 0; `Enter 1; `Leave 1 |]
+  (
+    from = [| -1; -1 |]
+    && ord = [| 0; 1 |]
+    && low = [| 0; 1 |]
+    && ord' = [|
+      `Enter 0;
+      `Leave 0;
+      `End_of_component [0];
+      `Enter 1;
+      `Leave 1;
+      `End_of_component [1];
+    |]
+  )
+    || (
+      from = [| -1; -1 |]
+      && ord = [| 1; 0 |]
+      && low = [| 1; 0 |]
+      && ord' = [|
+        `Enter 1;
+        `Leave 1;
+        `End_of_component [1];
+        `Enter 0;
+        `Leave 0;
+        `End_of_component [0];
+      |]
+    )
 
 let%test "scc(two components)" =
   let n = 6 in
@@ -289,14 +311,12 @@ let%test "scc(two components)" =
     [3];
   |] in
   let dist = Array.make n (-1) in
-  dist.(0) <- 0;
   let ord = Array.make n (-1) in
   let low = Array.make n (-1) in
   let comps =
-    lowlink_one ~g ~dist ~ord ~low 0
-    |> scc ~ord ~low
-    |> List.map (List.sort Int.compare)
-    |> List.sort (fun c c' -> Int.compare (List.hd c) (List.hd c')) in
+    lowlink ~g ~dist ~ord ~low
+    |> scc
+    |> List.map (List.sort Int.compare) in
   comps = [[0; 1; 2]; [3; 4; 5]]
 
 let%test "scc(dp_g)" =
@@ -313,12 +333,9 @@ let%test "scc(dp_g)" =
   let low = Array.make n (-1) in
   let comps =
     lowlink ~g ~dist ~ord ~low
-    |> scc ~ord ~low
-    |> List.map (List.sort Int.compare)
-    |> List.sort (fun c c' -> Int.compare (List.hd c) (List.hd c')) in
-  ord = [| 0; 3; 1; 2 |]
-    && low = [| 0; 3; 1; 2 |]
-    && comps = [[0]; [1]; [2]; [3]]
+    |> scc
+    |> List.map (List.sort Int.compare) in
+  comps = [[0]; [2]; [1]; [3]]
 
 let%test "scc(bug)" =
   let n = 5 in
@@ -334,11 +351,26 @@ let%test "scc(bug)" =
   let low = Array.make n (-1) in
   let comps =
     lowlink ~g ~dist ~ord ~low
-    |> scc ~ord ~low
+    |> scc
     |> List.map (List.sort Int.compare) in
-  ord = [| 0; 1; 0; 1; 2 |]
-    && low = [| 0; 0; 0; 1; 2 |]
-    && comps = [[2]; [3]; [4]; [0; 1]]
+  comps = [[2]; [3]; [4]; [0; 1]]
+
+let%test "scc(bug2)" =
+  let n = 4 in
+  let g = [|
+    [3; 1];
+    [2];
+    [0];
+    [1];
+  |] in
+  let dist = Array.make n (-1) in
+  let ord = Array.make n (-1) in
+  let low = Array.make n (-1) in
+  let comps =
+    lowlink ~g ~dist ~ord ~low
+    |> scc
+    |> List.map (List.sort Int.compare) in
+  comps = [[0; 1; 2; 3]]
 
 let%test "bfs(tree)" =
   let n = 7 in
