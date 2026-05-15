@@ -4,6 +4,7 @@ module type S = sig
   type t
 
   val make : int -> t
+  val at : int -> t -> elt
   val set : int -> elt -> t -> unit
   val apply_range : int -> int -> act -> t -> unit
   val product : int -> int -> t -> elt
