@@ -4,6 +4,7 @@ module type S = sig
   type t
 
   val make : int -> t
+  val at : int -> t -> elt
   val set : int -> elt -> t -> unit
   val apply_range : int -> int -> act -> t -> unit
   val product : int -> int -> t -> elt
@@ -21,7 +22,7 @@ struct
     prod : elt array;
     prop : act array;
   }
-  
+
   let make n =
     let leaf_count =
       let rec loop m = if m < n then loop (m * 2) else m in
@@ -39,12 +40,12 @@ struct
       t.prop.(k * 2 + 1) <- A.M.mul t.prop.(k * 2 + 1) t.prop.(k)
     end;
     t.prop.(k) <- A.M.one
-  
+
   let propagate_topdown k t =
     for i = Bit.leftmost_bit k downto 1 do
       propagate (k lsr i) t
     done
-  
+
   let rec recalc k t =
     if k > 1 then begin
       let p = k / 2 in
@@ -53,6 +54,13 @@ struct
       t.prod.(p) <- M.mul vl vr;
       recalc p t
     end
+
+  let at k t =
+    let k = k + t.leaf_count in
+    propagate_topdown k t;
+    propagate k t;
+    recalc k t;
+    t.prod.(k)
 
   let set k v t =
     let k = k + t.leaf_count in
@@ -81,7 +89,7 @@ struct
     loop l r;
     recalc kl t;
     recalc kr t
-  
+
   let product l r t =
     let l = l + t.leaf_count in
     let r = r + t.leaf_count in
