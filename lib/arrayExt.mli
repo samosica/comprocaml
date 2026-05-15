@@ -1,6 +1,14 @@
 (** Apply a function to an element of an array *)
 val replace : 'a array -> int -> ('a -> 'a) -> unit
 
+(** Calculate the dense rank of each element in an array.
+    Return (ranks, the lowest rank).
+    The smallest element is ranked first (starting from 0), and the largest
+    element is ranked last. Elements with the same value get the same rank,
+    and no ranks are skipped.
+  *)
+val rank : ?cmp:('a -> 'a -> int) -> 'a array -> int array * int
+
 (** Compute the next *subpermutation* of an array [a] in the lexicographic order.
     Just return [false] if [a] is the last subpermutation;
     otherwise modify [a] and return [true].
