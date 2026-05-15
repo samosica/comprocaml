@@ -1,5 +1,18 @@
 open Comprocaml
 
+
+let%test "rank" =
+  let a = [| 100; 68; 30; 99 |] in
+  ArrayExt.rank a = ([| 3; 1; 0; 2 |], 4)
+
+let%test "rank with duplicates" =
+  let a = [| 100; 68; 30; 99; 100; 68; 30; 99 |] in
+  ArrayExt.rank a = ([| 3; 1; 0; 2; 3; 1; 0; 2 |], 4)
+
+let%test "rank with reverse order" =
+  let a = [| 100; 68; 30; 99 |] in
+  ArrayExt.rank ~cmp:(Fun.flip Int.compare) a = ([| 0; 2; 3; 1 |], 4)
+
 let%test "next_subpermutation(4, 2)" =
   let n = 2 in
   let a = [| 1; 2; 3; 4 |] in

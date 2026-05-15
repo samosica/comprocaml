@@ -1,5 +1,14 @@
 let[@inline] replace a i f = a.(i) <- f a.(i)
 
+let rank ?(cmp = compare) a =
+  let sorted = a |> Iter.of_array |> Iter.sort_uniq ~cmp |> Iter.to_array in
+  (
+    Array.init (Array.length a) (fun i ->
+      Option.get @@ Base.Array.binary_search sorted ~compare:cmp `First_equal_to a.(i)
+    ),
+    Array.length sorted
+  )
+
 let next_subpermutation ?(cmp = compare) n a =
   let l = Array.length a in
   let[@inline] rec f i =
