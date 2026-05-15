@@ -41,6 +41,7 @@ jobs:
         version:
           - '4.13'
           - '5.0'
+          - '5.3'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout tree
